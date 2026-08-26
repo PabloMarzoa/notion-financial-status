@@ -1,0 +1,10 @@
+{
+  "/api/notion": {
+    "target": "https://api.notion.com/v1",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api/notion": ""
+    }
+  }
+}

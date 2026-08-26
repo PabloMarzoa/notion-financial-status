@@ -80,7 +80,7 @@ export class NotionService {
       'Content-Type': 'application/json',
     });
 
-    const url = `http://localhost:3001/api/notion/databases/${dbId}/query`;
+    const url = `/api/notion/databases/${dbId}/query`;
 
     return this.http.post<any>(url, {}, { headers }).pipe(
       map((response) => {
@@ -123,7 +123,7 @@ export class NotionService {
       'Content-Type': 'application/json',
     });
 
-    const url = `http://localhost:3001/api/notion/pages/${record.id}`;
+    const url = `/api/notion/pages/${record.id}`;
 
     // Construir properties dinámicamente según lo que tenía el objeto original si existe
     const properties: any = {};
@@ -214,7 +214,7 @@ export class NotionService {
       'Content-Type': 'application/json',
     });
 
-    const url = `http://localhost:3001/api/notion/pages/${recordId}`;
+    const url = `/api/notion/pages/${recordId}`;
     const payload = { in_trash: true };
 
     return this.http.patch<any>(url, payload, { headers }).pipe(
@@ -246,7 +246,7 @@ export class NotionService {
       'Content-Type': 'application/json',
     });
 
-    const url = `http://localhost:3001/api/notion/pages`;
+    const url = `/api/notion/pages`;
     const formattedIsoDate = this.formatIsoDate(recordData.fecha);
 
     const schema = this.lastPropertiesSchema;

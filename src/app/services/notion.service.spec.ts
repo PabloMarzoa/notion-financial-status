@@ -116,7 +116,7 @@ describe('NotionService', () => {
       service.fetchDatabaseRecords().subscribe((records) => resolve(records));
     });
 
-    const req = httpTesting.expectOne('http://localhost:3001/api/notion/databases/3b84e723375b80b0a32bce9ccec7385a/query');
+    const req = httpTesting.expectOne('/api/notion/databases/3b84e723375b80b0a32bce9ccec7385a/query');
     expect(req.request.method).toBe('POST');
     expect(req.request.headers.get('Authorization')).toBe('Bearer secret_abc');
     req.flush(mockNotionResponse);
@@ -145,7 +145,7 @@ describe('NotionService', () => {
       });
     });
 
-    const req = httpTesting.expectOne('http://localhost:3001/api/notion/databases/invalid_db/query');
+    const req = httpTesting.expectOne('/api/notion/databases/invalid_db/query');
     req.flush({ message: 'Unauthorized' }, { status: 401, statusText: 'Unauthorized' });
 
     const err = await promise;
@@ -179,7 +179,7 @@ describe('NotionService', () => {
       service.updateRecord(recordToUpdate).subscribe((res) => resolve(res));
     });
 
-    const req = httpTesting.expectOne('http://localhost:3001/api/notion/pages/page-1234567890');
+    const req = httpTesting.expectOne('/api/notion/pages/page-1234567890');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.headers.get('Authorization')).toBe('Bearer secret_abc');
     expect(req.request.body.properties.Cantidad.number).toBe(89.9);
@@ -197,7 +197,7 @@ describe('NotionService', () => {
       service.deleteRecord('page-1234567890').subscribe((res) => resolve(res));
     });
 
-    const req = httpTesting.expectOne('http://localhost:3001/api/notion/pages/page-1234567890');
+    const req = httpTesting.expectOne('/api/notion/pages/page-1234567890');
     expect(req.request.method).toBe('PATCH');
     expect(req.request.headers.get('Authorization')).toBe('Bearer secret_abc');
     expect(req.request.body).toEqual({ in_trash: true });
@@ -223,7 +223,7 @@ describe('NotionService', () => {
       service.createRecord(newRecordData).subscribe((res) => resolve(res));
     });
 
-    const req = httpTesting.expectOne('http://localhost:3001/api/notion/pages');
+    const req = httpTesting.expectOne('/api/notion/pages');
     expect(req.request.method).toBe('POST');
     expect(req.request.headers.get('Authorization')).toBe('Bearer secret_abc');
     expect(req.request.body.parent.database_id).toBe('db_123');

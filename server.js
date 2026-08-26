@@ -1,10 +1,28 @@
 const http = require('http');
 const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
-const PORT = 3001;
+const PORT = process.env.PORT || 8080;
+const STATIC_DIR = path.join(__dirname, 'dist', 'finanzas', 'browser');
+
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+};
 
 const server = http.createServer((req, res) => {
-  // Configuración completa de cabeceras CORS
+  // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Notion-Version, x-requested-with');
@@ -16,10 +34,10 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Comprobar si la ruta es para Notion
+  // 1. Notion API Reverse Proxy
   if (req.url.startsWith('/api/notion/')) {
     const notionPath = req.url.replace('/api/notion/', '/v1/');
-    
+
     let body = [];
     req.on('data', chunk => body.push(chunk));
     req.on('end', () => {
@@ -39,7 +57,6 @@ const server = http.createServer((req, res) => {
       };
 
       const notionReq = https.request(options, (notionRes) => {
-        // Combinar cabeceras asegurando CORS en la respuesta de Notion
         const responseHeaders = { ...notionRes.headers };
         responseHeaders['access-control-allow-origin'] = '*';
         responseHeaders['access-control-allow-methods'] = 'GET, POST, PATCH, PUT, DELETE, OPTIONS';
@@ -61,15 +78,34 @@ const server = http.createServer((req, res) => {
       notionReq.write(postData);
       notionReq.end();
     });
-  } else {
-    res.writeHead(404, {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    });
-    res.end(JSON.stringify({ error: 'Not found' }));
+    return;
   }
+
+  // 2. Static File Serving (Angular SPA)
+  if (req.method === 'GET' || req.method === 'HEAD') {
+    let cleanUrl = req.url.split('?')[0];
+    let filePath = path.join(STATIC_DIR, cleanUrl);
+
+    // If directory or root, serve index.html
+    if (cleanUrl === '/' || !fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(STATIC_DIR, 'index.html');
+    }
+
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+      const fileStream = fs.createReadStream(filePath);
+      
+      res.writeHead(200, { 'Content-Type': contentType });
+      fileStream.pipe(res);
+      return;
+    }
+  }
+
+  res.writeHead(404, { 'Content-Type': 'text/plain' });
+  res.end('Not Found');
 });
 
 server.listen(PORT, () => {
-  console.log(`Notion Proxy Server listening on http://localhost:${PORT}`);
+  console.log(`Financial Status app server running on http://0.0.0.0:${PORT}`);
 });

@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  financial-status:
+    image: pablomarzoa/notion-financial-status:latest
+    container_name: financial-status
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080

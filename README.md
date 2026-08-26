@@ -1,43 +1,65 @@
 # Notion Financial Status
 
-Aplicación Angular para el control y análisis de finanzas personales sincronizada en tiempo real con Notion.
+Aplicación Angular para el control, análisis y gestión de finanzas personales sincronizada en tiempo real con Notion.
 
 ---
 
-## ⚙️ Configuración con tu propia Base de Datos de Notion
+## ⚙️ Guía de Configuración Inicial con Notion
 
-Si estás viendo la aplicación en **Modo Demo**, sigue estos pasos para conectarla a tu Notion:
-
-### 1. Crear una integración en Notion
-1. Ve a [Notion Developers - My Integrations](https://www.notion.so/profile/integrations).
-2. Crea una nueva integración (por ejemplo, `Control Finanzas`).
-3. Copia el **Internal Integration Secret (API Token)** que empieza por `secret_...` o `ntn_...`.
-
-### 2. Preparar tu Base de Datos en Notion
-Crea una base de datos en Notion con las siguientes propiedades (o nombres equivalentes):
-- **`Descripción`** (o `Name`): Tipo **Title** (Texto principal).
-- **`Cantidad`** (o `Importe`): Tipo **Number** (o Rich Text).
-- **`Tipo`**: Tipo **Select** con opciones: `Gasto único`, `Gasto recurrente`, `Ingreso`.
-- **`Categoría`**: Tipo **Select** o **Multi-select** (ej: `Comida`, `Piso`, `Amazon`, `Gasolina`, `Ocio`, `Nómina`, etc.).
-- **`Fecha`**: Tipo **Date** (formato fecha).
-
-### 3. Conectar la integración a tu Base de Datos
-1. Abre tu base de datos en Notion en tu navegador o app.
-2. Haz clic en los tres puntos `...` de la esquina superior derecha > **Connections / Conexiones**.
-3. Añade tu integración creada en el paso 1.
-4. Copia el **Database ID** de la URL de tu base de datos (los 32 caracteres alfanuméricos después de tu workspace y antes del signo `?`).
-
-### 4. Configurar la App
-1. Abre la app en tu navegador.
-2. Haz clic en el botón **Configurar Notion** en la barra superior.
-3. Introduce tu **API Token** y tu **Database ID**.
-4. ¡Listo! Tus movimientos se cargarán y sincronizarán automáticamente.
+Si estás viendo la aplicación en **Modo Demo**, sigue estos 3 sencillos pasos para vincular tu propia base de datos:
 
 ---
 
-## 🚀 Despliegue en Docker / ZimaOS
+### Paso 1: Crear la Base de Datos en Notion
 
-### Opción 1: Docker CLI / ZimaOS Custom App
+Tienes dos formas de disponer de la plantilla de base de datos necesaria:
+
+- **Opción A (Recomendada - Duplicar Plantilla Online)**:  
+  Abre la [Base de Datos Publicada en Notion](https://discreet-firewall-1fb.notion.site/f7a4e723375b825cb30481df2c173df4?v=7e34e723375b82f180710812190339f6&source=copy_link) y pulsa en el botón superior derecho **Duplicar** para clonarla en tu propio espacio de trabajo.
+- **Opción B (Importar archivo ZIP)**:  
+  Descarga el archivo [bbdd-notion.zip](./BBDD/bbdd-notion.zip) de la carpeta `BBDD` de este repositorio e impórtalo directamente en tu Notion.
+
+---
+
+### Paso 2: Crear tu Token Personal de Acceso (API Key)
+
+Para que la aplicación pueda leer y escribir tus movimientos, necesitas un token de integración:
+
+1. Accede a [Notion Developers - Integraciones / Tokens](https://www.notion.so/profile/integrations).
+2. Sigue los pasos oficiales descritos en la [Guía de Personal Access Tokens de Notion](https://developers.notion.com/guides/get-started/personal-access-tokens) para crear una nueva integración interna (por ejemplo, llamada `Control Finanzas`).
+3. Copia el **Internal Integration Secret (API Token)** que comienza por `secret_...` o `ntn_...`.
+4. En tu Notion, abre la base de datos que creaste en el **Paso 1**, haz clic en el menú `...` (arriba a la derecha) > **Conexiones** (Connections) y conecta la integración recién creada.
+
+---
+
+### Paso 3: Obtener el ID de tu Base de Datos
+
+Para localizar el **Database ID** de tu base de datos en Notion:
+
+1. En la pestaña de la tabla o vista de tu base de datos, haz clic en el menú contextual de la vista y selecciona **"Copiar enlace de la vista"**:
+
+   ![Copiar enlace de la vista](./docs/images/copiar-enlace-vista.png)
+
+2. Pega el enlace copiado en cualquier lugar para inspeccionarlo. Verás una URL con el siguiente formato:
+   `https://app.notion.com/p/f7a4e723375b825cb30481df2c173df4?v=7e34e723375b82f180710812190339f6&source=copy_link`
+
+3. Tu **Database ID** es la cadena de 32 caracteres que se encuentra inmediatamente después de `/p/` (o después de tu workspace) y antes de los parámetros `?v=...`:
+
+   ![Obtener Database ID](./docs/images/obtener-database-id.png)
+
+---
+
+### Paso 4: Introducir Credenciales en la Aplicación
+
+1. En la barra superior de la app, haz clic en el botón **Configurar Notion** (o **Configurar Ahora** en el banner del modo demo).
+2. Pega tu **API Token** y tu **Database ID**.
+3. Guarda los cambios. ¡La aplicación cargará tus datos reales automáticamente!
+
+---
+
+## 🚀 Despliegue en Docker
+
+### Opción 1: Docker CLI
 
 ```bash
 docker run -d \
@@ -59,24 +81,4 @@ services:
     restart: unless-stopped
     ports:
       - "9090:8080"
-```
-
-Accede desde tu navegador en tu red local: `http://<IP_DE_TU_ZIMAOS>:9090`
-
----
-
-## 🛠️ Publicar a Docker Hub
-
-### Automático con GitHub Actions
-1. En tu repositorio GitHub ([notion-financial-status](https://github.com/PabloMarzoa/notion-financial-status)), ve a **Settings > Secrets and variables > Actions**.
-2. Añade dos secrets:
-   - `DOCKERHUB_USERNAME`: Tu usuario de Docker Hub (`pmarzoa`).
-   - `DOCKERHUB_TOKEN`: Tu Access Token de Docker Hub.
-3. Cada `git push` a `master` construirá y publicará automáticamente la imagen multiplataforma (`linux/amd64` y `linux/arm64`).
-
-### Manual desde tu máquina
-```bash
-docker login
-docker build -t pmarzoa/notion-financial-status:latest .
-docker push pmarzoa/notion-financial-status:latest
 ```

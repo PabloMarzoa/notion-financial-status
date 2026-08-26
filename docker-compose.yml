@@ -1,11 +1,13 @@
-version: '3.8'
+name: notion-financial-status
 
 services:
   financial-status:
-    image: pablomarzoa/notion-financial-status:latest
+    image: pmarzoa/notion-financial-status:latest
     container_name: financial-status
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "9090:8080"
     environment:
       - PORT=8080
+    labels:
+      icon: "https://raw.githubusercontent.com/PabloMarzoa/notion-financial-status/master/public/favicon.ico"

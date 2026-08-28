@@ -1,22 +1,17 @@
-<div class="min-h-screen bg-slate-950 text-slate-100 p-3.5 sm:p-5 md:p-8 xl:p-10 2xl:p-12 selection:bg-emerald-500 selection:text-slate-950 font-sans">
+<div class="min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-3.5 sm:p-5 md:p-8 xl:p-10 2xl:p-12 selection:bg-emerald-500 selection:text-slate-950 font-sans transition-colors duration-300">
   <div class="max-w-7xl 2xl:max-w-[1720px] 3xl:max-w-[2100px] mx-auto space-y-6 sm:space-y-8">
     
     <!-- Top Header & Notion Status -->
-    <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-slate-800/80">
+    <header class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-slate-300/80 dark:border-slate-800/80">
       <div>
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-cyan-500 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-emerald-500/20 text-lg sm:text-xl flex-shrink-0">
             €
           </div>
           <div>
-            <h1 class="text-xl sm:text-2xl md:text-3xl 2xl:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            <h1 class="text-xl sm:text-2xl md:text-3xl 2xl:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-slate-950 via-emerald-600 to-slate-700 dark:from-white dark:via-emerald-300 dark:to-slate-400 bg-clip-text text-transparent animate-title-gradient">
               Control de Finanzas
             </h1>
-            <p class="text-xs sm:text-sm text-slate-400 font-medium truncate max-w-[280px] sm:max-w-md md:max-w-none">
-              Sincronizado con Notion: 
-              <span *ngIf="notionService.databaseId()" class="font-mono text-slate-300">{{ notionService.databaseId() }}</span>
-              <span *ngIf="!notionService.databaseId()" class="italic text-slate-500">Sin configurar</span>
-            </p>
           </div>
         </div>
       </div>
@@ -28,8 +23,8 @@
           class="flex items-center space-x-2 px-3 py-1.5 rounded-xl border text-[11px] sm:text-xs font-medium backdrop-blur-md"
           [ngClass]="
             usingMockData()
-              ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
-              : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+              ? 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300'
+              : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
           "
         >
           <span
@@ -39,11 +34,27 @@
           <span class="whitespace-nowrap">{{ usingMockData() ? 'Modo Demo (Mock)' : 'Conectado a Notion' }}</span>
         </div>
 
+        <!-- Theme Toggle Button -->
+        <button
+          (click)="themeService.toggleTheme()"
+          class="p-2 sm:p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition shadow-sm cursor-pointer"
+          [title]="themeService.currentTheme() === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+        >
+          <!-- Sun Icon for switching to light or when dark -->
+          <svg *ngIf="themeService.currentTheme() === 'dark'" class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <!-- Moon Icon for switching to dark or when light -->
+          <svg *ngIf="themeService.currentTheme() === 'light'" class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+
         <!-- Reload Button -->
         <button
           (click)="loadData()"
           [disabled]="notionService.isLoading()"
-          class="p-2 sm:p-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 rounded-xl text-slate-300 hover:text-white transition disabled:opacity-50 shadow-sm cursor-pointer"
+          class="p-2 sm:p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition disabled:opacity-50 shadow-sm cursor-pointer"
           title="Recargar datos"
         >
           <svg
@@ -71,9 +82,9 @@
         <!-- Notion Config Button -->
         <button
           (click)="showConfigModal.set(true)"
-          class="flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-200 hover:text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition active:scale-95 cursor-pointer whitespace-nowrap"
+          class="flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition active:scale-95 cursor-pointer whitespace-nowrap"
         >
-          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
@@ -85,20 +96,20 @@
     <!-- Demo Mode Banner with link to GitHub README instructions -->
     <div
       *ngIf="usingMockData()"
-      class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-slate-900 to-amber-500/10 border border-amber-500/30 text-amber-200 text-xs sm:text-sm shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fade-in relative overflow-hidden"
+      class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white dark:via-slate-900 to-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs sm:text-sm shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fade-in relative overflow-hidden"
     >
       <div class="flex items-start sm:items-center space-x-3.5">
-        <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-300 flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0 shadow-sm">
+        <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-300 flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0 shadow-sm">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
         <div class="space-y-0.5">
           <div class="flex items-center space-x-2">
-            <span class="font-bold text-white text-sm">Modo Demo Activo</span>
-            <span class="px-2 py-0.5 text-[10px] font-semibold bg-amber-500/20 text-amber-300 rounded-md border border-amber-500/30 uppercase tracking-wider">Muestra</span>
+            <span class="font-bold text-slate-900 dark:text-white text-sm">Modo Demo Activo</span>
+            <span class="px-2 py-0.5 text-[10px] font-semibold bg-amber-500/20 text-amber-700 dark:text-amber-300 rounded-md border border-amber-500/30 uppercase tracking-wider">Muestra</span>
           </div>
-          <p class="text-xs text-slate-300 leading-relaxed">
+          <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
             Estás visualizando datos de ejemplo. Para conectar tu propia base de datos de Notion, sigue los pasos descritos en la documentación.
           </p>
         </div>
@@ -109,7 +120,7 @@
           href="https://github.com/PabloMarzoa/notion-financial-status/blob/master/README.md"
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-medium border border-slate-700 text-xs shadow-sm transition active:scale-95"
+          class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-medium border border-slate-300 dark:border-slate-700 text-xs shadow-sm transition active:scale-95"
         >
           <span>Ver Guía en README</span>
           <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,334 +143,369 @@
     <!-- Error Alert if Notion failed -->
     <div
       *ngIf="notionService.errorMessage() && !usingMockData()"
-      class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+      class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2"
     >
       <div class="flex items-center space-x-3">
-        <svg class="w-5 h-5 text-rose-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 text-rose-500 dark:text-rose-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
         </svg>
         <span>{{ notionService.errorMessage() }} — Mostrando datos de ejemplo.</span>
       </div>
       <button
         (click)="showConfigModal.set(true)"
-        class="text-xs font-semibold underline hover:text-rose-200 self-end sm:self-auto cursor-pointer"
+        class="text-xs font-semibold underline hover:text-rose-900 dark:hover:text-rose-200 self-end sm:self-auto cursor-pointer"
       >
         Revisar Token
       </button>
     </div>
 
-    <!-- Filters Bar (Time intervals & selectors) -->
-    <div class="bg-slate-900/80 border border-slate-800/80 rounded-2xl p-3.5 sm:p-4 shadow-xl backdrop-blur-md space-y-4">
-      <div class="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4">
+    <!-- Filters Bar (All aligned to left) -->
+    <div class="bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3.5 sm:p-4 shadow-xl backdrop-blur-md">
+      <div class="flex flex-wrap items-center gap-2.5 sm:gap-3 justify-start">
         
-        <!-- Time Range Buttons (Smooth horizontal scroll on mobile) -->
-        <div class="flex items-center space-x-1.5 overflow-x-auto pb-2 2xl:pb-0 scrollbar-none">
-          <button
-            (click)="setTimeRange('current_month')"
-            class="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold rounded-xl transition whitespace-nowrap cursor-pointer"
-            [ngClass]="timeRange() === 'current_month' ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            Este mes
-          </button>
-          <button
-            (click)="setTimeRange('last_3_months')"
-            class="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold rounded-xl transition whitespace-nowrap cursor-pointer"
-            [ngClass]="timeRange() === 'last_3_months' ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            Últimos 3 meses
-          </button>
-          <button
-            (click)="setTimeRange('last_6_months')"
-            class="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold rounded-xl transition whitespace-nowrap cursor-pointer"
-            [ngClass]="timeRange() === 'last_6_months' ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            Últimos 6 meses
-          </button>
-          <button
-            (click)="setTimeRange('last_12_months')"
-            class="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold rounded-xl transition whitespace-nowrap cursor-pointer"
-            [ngClass]="timeRange() === 'last_12_months' ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            Últimos 12 meses
-          </button>
-          <button
-            (click)="setTimeRange('current_year')"
-            class="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold rounded-xl transition whitespace-nowrap cursor-pointer"
-            [ngClass]="timeRange() === 'current_year' ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            Año actual
-          </button>
-          <button
-            (click)="setTimeRange('all')"
-            class="px-3 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold rounded-xl transition whitespace-nowrap cursor-pointer"
-            [ngClass]="timeRange() === 'all' ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            Todo el histórico
-          </button>
-        </div>
-
-        <!-- Filter Selects & Search -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 2xl:flex 2xl:items-center">
-          <!-- Search input -->
-          <div class="relative w-full sm:w-auto 2xl:w-60">
-            <input
-              type="text"
-              [ngModel]="searchQuery()"
-              (ngModelChange)="searchQuery.set($event)"
-              placeholder="Buscar movimiento..."
-              class="w-full pl-8 pr-3 py-1.5 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-            />
-            <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-
-          <!-- Category filter -->
-          <select
-            [ngModel]="selectedCategory()"
-            (ngModelChange)="selectedCategory.set($event)"
-            class="w-full sm:w-auto px-3 py-1.5 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
-          >
-            <option value="all">Todas las categorías</option>
-            <option *ngFor="let cat of availableCategories()" [value]="cat">{{ cat }}</option>
-          </select>
-
-          <!-- Type filter -->
-          <select
-            [ngModel]="selectedType()"
-            (ngModelChange)="selectedType.set($event)"
-            class="w-full sm:w-auto px-3 py-1.5 bg-slate-800/80 border border-slate-700/80 rounded-xl text-xs text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
-          >
-            <option value="all">Todos los tipos</option>
-            <option value="Ingreso">Ingreso</option>
-            <option value="Gasto recurrente">Gasto recurrente</option>
-            <option value="Gasto único">Gasto único</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Summary KPI Cards (Responsive grid: 1 col on mobile, 2 on tablet, 4 on desktop, expanded on ultrawide) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5">
-      
-      <!-- Card: Total Ingresos -->
-      <div class="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-700 transition">
-        <div class="flex items-center justify-between text-slate-400 mb-2">
-          <span class="text-xs font-semibold uppercase tracking-wider">Ingresos Totales</span>
-          <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
-            </svg>
-          </div>
-        </div>
-        <div class="text-xl sm:text-2xl 2xl:text-3xl font-bold tracking-tight text-white font-mono">
-          +{{ stats().totalIngresos | number : '1.2-2' }} €
-        </div>
-        <div class="text-xs text-emerald-400/80 mt-1 flex items-center space-x-1">
-          <span>Período seleccionado</span>
-        </div>
-      </div>
-
-      <!-- Card: Total Gastos -->
-      <div class="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-700 transition">
-        <div class="flex items-center justify-between text-slate-400 mb-2">
-          <span class="text-xs font-semibold uppercase tracking-wider">Gastos Totales</span>
-          <div class="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-            </svg>
-          </div>
-        </div>
-        <div class="text-xl sm:text-2xl 2xl:text-3xl font-bold tracking-tight text-white font-mono">
-          -{{ stats().totalGastos | number : '1.2-2' }} €
-        </div>
-        <div class="text-xs text-slate-400 mt-1 flex items-center justify-between">
-          <span>Recurrente: <strong class="text-slate-300 font-mono">{{ stats().totalGastoRecurrente | number : '1.0-0' }}€</strong></span>
-          <span>Único: <strong class="text-slate-300 font-mono">{{ stats().totalGastoUnico | number : '1.0-0' }}€</strong></span>
-        </div>
-      </div>
-
-      <!-- Card: Balance Neto -->
-      <div class="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-700 transition">
-        <div class="flex items-center justify-between text-slate-400 mb-2">
-          <span class="text-xs font-semibold uppercase tracking-wider">Balance Neto</span>
-          <div
-            class="w-8 h-8 rounded-xl border flex items-center justify-center"
-            [ngClass]="stats().balanceNeto >= 0 ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-400'"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        </div>
-        <div
-          class="text-xl sm:text-2xl 2xl:text-3xl font-bold tracking-tight font-mono"
-          [ngClass]="stats().balanceNeto >= 0 ? 'text-cyan-300' : 'text-rose-400'"
+        <!-- Time Range Dropdown -->
+        <select
+          [ngModel]="timeRange()"
+          (ngModelChange)="setTimeRange($event)"
+          class="w-full sm:w-auto px-3 py-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
         >
-          {{ stats().balanceNeto >= 0 ? '+' : '' }}{{ stats().balanceNeto | number : '1.2-2' }} €
-        </div>
-        <div class="text-xs text-slate-400 mt-1">
-          Diferencia neta ahorro
-        </div>
-      </div>
+          <option value="current_month">Este mes</option>
+          <option value="last_3_months">Últimos 3 meses</option>
+          <option value="last_6_months">Últimos 6 meses</option>
+          <option value="last_12_months">Últimos 12 meses</option>
+          <option value="current_year">Año actual</option>
+          <option value="all">Todo el histórico</option>
+        </select>
 
-      <!-- Card: Tasa de Ahorro -->
-      <div class="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-700 transition">
-        <div class="flex items-center justify-between text-slate-400 mb-2">
-          <span class="text-xs font-semibold uppercase tracking-wider">Tasa de Ahorro</span>
-          <div class="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-          </div>
-        </div>
-        <div class="text-xl sm:text-2xl 2xl:text-3xl font-bold tracking-tight text-white font-mono">
-          {{ stats().tasaAhorro }}%
-        </div>
-        <div class="text-xs text-purple-400/80 mt-1">
-          Sobre los ingresos recibidos
-        </div>
-      </div>
+        <!-- Category filter -->
+        <select
+          [ngModel]="selectedCategory()"
+          (ngModelChange)="selectedCategory.set($event)"
+          class="w-full sm:w-auto px-3 py-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
+        >
+          <option value="all">Todas las categorías</option>
+          <option *ngFor="let cat of availableCategories()" [value]="cat">{{ cat }}</option>
+        </select>
 
-    </div>
+        <!-- Type filter -->
+        <select
+          [ngModel]="selectedType()"
+          (ngModelChange)="selectedType.set($event)"
+          class="w-full sm:w-auto px-3 py-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
+        >
+          <option value="all">Todos los tipos</option>
+          <option value="Ingreso">Ingreso</option>
+          <option value="Gasto recurrente">Gasto recurrente</option>
+          <option value="Gasto único">Gasto único</option>
+        </select>
 
-    <!-- Charts Section (Expanded width support on Ultrawide screens) -->
-    <app-charts [stats]="stats()"></app-charts>
-
-    <!-- Table & Mobile List of Transactions -->
-    <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl backdrop-blur-md mt-6 sm:mt-8">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-        <div>
-          <h3 class="text-base sm:text-lg font-semibold text-white tracking-tight">Registro de Movimientos</h3>
-          <p class="text-xs text-slate-400">Mostrando {{ filteredRecords().length }} operaciones en el filtro actual</p>
-        </div>
-        <span class="text-xs text-slate-400 flex items-center space-x-1">
-          <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        <!-- Search input -->
+        <div class="relative w-full sm:w-auto 2xl:w-60">
+          <input
+            type="text"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            placeholder="Buscar movimiento..."
+            class="w-full pl-8 pr-3 py-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+          />
+          <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <span>Haz clic o toca un movimiento para editarlo</span>
-        </span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SKELETON LOADING STATE -->
+    <ng-container *ngIf="notionService.isLoading()">
+      <!-- Skeleton KPI Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5 animate-pulse">
+        <div *ngFor="let i of [1, 2, 3, 4]" class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="h-3 w-24 bg-slate-200 dark:bg-slate-800 rounded-md"></div>
+            <div class="w-8 h-8 rounded-xl bg-slate-200 dark:bg-slate-800"></div>
+          </div>
+          <div class="h-7 sm:h-8 w-32 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+          <div class="h-3 w-28 bg-slate-200/60 dark:bg-slate-800/60 rounded-md"></div>
+        </div>
       </div>
 
-      <!-- Mobile Card List View (Optimized for iPhone / touch screens < md) -->
-      <div class="block md:hidden space-y-2.5">
-        <div
-          *ngFor="let record of filteredRecords()"
-          (click)="selectRecordForEdit(record)"
-          class="p-3.5 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-800 active:scale-[0.99] transition cursor-pointer"
-        >
-          <div class="flex items-start justify-between gap-2">
-            <div class="space-y-1">
-              <span class="text-xs text-slate-400 font-mono">{{ record.fechaString }}</span>
-              <h4 class="text-sm font-semibold text-white leading-snug">{{ record.name }}</h4>
+      <!-- Skeleton Charts -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 animate-pulse mt-4 sm:mt-6">
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4 shadow-xl">
+          <div class="flex items-center justify-between">
+            <div class="space-y-1.5">
+              <div class="h-4 w-36 bg-slate-200 dark:bg-slate-800 rounded-md"></div>
+              <div class="h-3 w-48 bg-slate-200/60 dark:bg-slate-800/60 rounded-md"></div>
             </div>
-            <div class="text-right flex-shrink-0">
-              <div
-                class="text-sm font-bold font-mono"
-                [ngClass]="record.tipo === 'Ingreso' ? 'text-emerald-400' : 'text-slate-100'"
-              >
-                {{ record.tipo === 'Ingreso' ? '+' : '-' }}{{ record.cantidad | number : '1.2-2' }} €
+            <div class="h-6 w-20 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+          </div>
+          <div class="h-4 w-full bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+          <div class="space-y-2.5 pt-2">
+            <div *ngFor="let i of [1, 2, 3, 4]" class="h-10 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl"></div>
+          </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4 shadow-xl">
+          <div class="flex items-center justify-between">
+            <div class="space-y-1.5">
+              <div class="h-4 w-36 bg-slate-200 dark:bg-slate-800 rounded-md"></div>
+              <div class="h-3 w-48 bg-slate-200/60 dark:bg-slate-800/60 rounded-md"></div>
+            </div>
+            <div class="h-4 w-28 bg-slate-200 dark:bg-slate-800 rounded-md"></div>
+          </div>
+          <div class="space-y-3 pt-2">
+            <div *ngFor="let i of [1, 2, 3]" class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/40 space-y-2">
+              <div class="flex justify-between">
+                <div class="h-3 w-16 bg-slate-200 dark:bg-slate-800 rounded"></div>
+                <div class="h-3 w-20 bg-slate-200 dark:bg-slate-800 rounded"></div>
               </div>
-              <span class="text-[10px] text-slate-400">{{ record.tipo }}</span>
+              <div class="h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+              <div class="h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
             </div>
           </div>
-
-          <div class="flex items-center justify-between pt-2.5 mt-2 border-t border-slate-800/80">
-            <span
-              class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-lg text-[10px] font-medium border"
-              [style.border-color]="getCategoryColor(record.categoria) + '40'"
-              [style.background-color]="getCategoryColor(record.categoria) + '15'"
-              [style.color]="getCategoryColor(record.categoria)"
-            >
-              <span class="w-1.5 h-1.5 rounded-full" [style.background-color]="getCategoryColor(record.categoria)"></span>
-              <span>{{ record.categoria }}</span>
-            </span>
-
-            <span class="text-xs text-cyan-400 font-medium flex items-center space-x-0.5">
-              <span>Editar</span>
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </span>
-          </div>
-        </div>
-
-        <div *ngIf="filteredRecords().length === 0" class="py-10 text-center text-slate-500 text-xs">
-          No hay movimientos que coincidan con los filtros aplicados.
         </div>
       </div>
 
-      <!-- Desktop & Ultrawide Table View (hidden on mobile, visible on md+) -->
-      <div class="hidden md:block overflow-x-auto">
-        <table class="w-full text-left text-xs 2xl:text-sm text-slate-300">
-          <thead class="text-slate-400 uppercase tracking-wider border-b border-slate-800 bg-slate-800/30">
-            <tr>
-              <th scope="col" class="py-3 px-4 rounded-l-xl">Fecha</th>
-              <th scope="col" class="py-3 px-4">Concepto</th>
-              <th scope="col" class="py-3 px-4">Categoría</th>
-              <th scope="col" class="py-3 px-4">Tipo</th>
-              <th scope="col" class="py-3 px-4 text-right">Cantidad</th>
-              <th scope="col" class="py-3 px-3 text-center rounded-r-xl w-10"></th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-800/60">
-            <tr
-              *ngFor="let record of filteredRecords()"
-              (click)="selectRecordForEdit(record)"
-              class="hover:bg-slate-800/60 transition group cursor-pointer"
-              title="Haz clic para editar este movimiento"
+      <!-- Skeleton Transaction Table -->
+      <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl space-y-4 animate-pulse mt-6 sm:mt-8">
+        <div class="flex justify-between items-center">
+          <div class="space-y-1.5">
+            <div class="h-5 w-44 bg-slate-200 dark:bg-slate-800 rounded-md"></div>
+            <div class="h-3 w-32 bg-slate-200/60 dark:bg-slate-800/60 rounded-md"></div>
+          </div>
+          <div class="h-4 w-48 bg-slate-200/60 dark:bg-slate-800/60 rounded-md hidden sm:block"></div>
+        </div>
+        <div class="space-y-2.5 pt-2">
+          <div *ngFor="let i of [1, 2, 3, 4, 5, 6]" class="h-12 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl"></div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- CONTENT WHEN LOADED -->
+    <ng-container *ngIf="!notionService.isLoading()">
+      <!-- Summary KPI Cards (Responsive grid: 1 col on mobile, 2 on tablet, 4 on desktop, expanded on ultrawide) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5">
+        
+        <!-- Card: Total Ingresos -->
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700 transition">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Ingresos Totales</span>
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+              </svg>
+            </div>
+          </div>
+          <div class="text-xl sm:text-2xl 2xl:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+            +{{ stats().totalIngresos | number : '1.2-2' }} €
+          </div>
+          <div class="text-xs text-emerald-600 dark:text-emerald-400/80 mt-1 flex items-center space-x-1">
+            <span>Período seleccionado</span>
+          </div>
+        </div>
+
+        <!-- Card: Total Gastos -->
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700 transition">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Gastos Totales</span>
+            <div class="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
+              </svg>
+            </div>
+          </div>
+          <div class="text-xl sm:text-2xl 2xl:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+            -{{ stats().totalGastos | number : '1.2-2' }} €
+          </div>
+          <div class="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center justify-between">
+            <span>Recurrente: <strong class="text-slate-700 dark:text-slate-300 font-mono">{{ stats().totalGastoRecurrente | number : '1.0-0' }}€</strong></span>
+            <span>Único: <strong class="text-slate-700 dark:text-slate-300 font-mono">{{ stats().totalGastoUnico | number : '1.0-0' }}€</strong></span>
+          </div>
+        </div>
+
+        <!-- Card: Balance Neto -->
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700 transition">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Balance Neto</span>
+            <div
+              class="w-8 h-8 rounded-xl border flex items-center justify-center"
+              [ngClass]="stats().balanceNeto >= 0 ? 'bg-cyan-500/10 border-cyan-500/20 text-cyan-600 dark:text-cyan-400' : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'"
             >
-              <td class="py-3.5 px-4 font-mono text-slate-400">
-                {{ record.fechaString }}
-              </td>
-              <td class="py-3.5 px-4 font-medium text-slate-100 group-hover:text-cyan-300 transition">
-                {{ record.name }}
-              </td>
-              <td class="py-3.5 px-4">
-                <span
-                  class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] 2xl:text-xs font-medium border"
-                  [style.border-color]="getCategoryColor(record.categoria) + '40'"
-                  [style.background-color]="getCategoryColor(record.categoria) + '15'"
-                  [style.color]="getCategoryColor(record.categoria)"
-                >
-                  <span class="w-1.5 h-1.5 rounded-full" [style.background-color]="getCategoryColor(record.categoria)"></span>
-                  <span>{{ record.categoria }}</span>
-                </span>
-              </td>
-              <td class="py-3.5 px-4">
-                <span
-                  class="px-2.5 py-0.5 rounded-md text-[11px] 2xl:text-xs font-medium border"
-                  [ngClass]="{
-                    'bg-emerald-500/10 text-emerald-400 border-emerald-500/20': record.tipo === 'Ingreso',
-                    'bg-amber-500/10 text-amber-400 border-amber-500/20': record.tipo === 'Gasto recurrente',
-                    'bg-slate-800 text-slate-400 border-slate-700': record.tipo === 'Gasto único'
-                  }"
-                >
-                  {{ record.tipo }}
-                </span>
-              </td>
-              <td class="py-3.5 px-4 text-right font-mono font-semibold text-sm 2xl:text-base">
-                <span
-                  [ngClass]="record.tipo === 'Ingreso' ? 'text-emerald-400' : 'text-slate-100'"
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <div
+            class="text-xl sm:text-2xl 2xl:text-3xl font-bold tracking-tight font-mono"
+            [ngClass]="stats().balanceNeto >= 0 ? 'text-cyan-600 dark:text-cyan-300' : 'text-rose-600 dark:text-rose-400'"
+          >
+            {{ stats().balanceNeto >= 0 ? '+' : '' }}{{ stats().balanceNeto | number : '1.2-2' }} €
+          </div>
+          <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Diferencia neta ahorro
+          </div>
+        </div>
+
+        <!-- Card: Tasa de Ahorro -->
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700 transition">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+            <span class="text-xs font-semibold uppercase tracking-wider">Tasa de Ahorro</span>
+            <div class="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+          </div>
+          <div class="text-xl sm:text-2xl 2xl:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+            {{ stats().tasaAhorro }}%
+          </div>
+          <div class="text-xs text-purple-600 dark:text-purple-400/80 mt-1">
+            Sobre los ingresos recibidos
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Charts Section (Expanded width support on Ultrawide screens) -->
+      <app-charts [stats]="stats()"></app-charts>
+
+      <!-- Table & Mobile List of Transactions -->
+      <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl backdrop-blur-md mt-6 sm:mt-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+          <div>
+            <h3 class="text-base sm:text-lg font-semibold text-slate-900 dark:text-white tracking-tight">Registro de Movimientos</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Mostrando {{ filteredRecords().length }} operaciones en el filtro actual</p>
+          </div>
+          <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center space-x-1">
+            <svg class="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            <span>Haz clic o toca un movimiento para editarlo</span>
+          </span>
+        </div>
+
+        <!-- Mobile Card List View (Optimized for iPhone / touch screens < md) -->
+        <div class="block md:hidden space-y-2.5">
+          <div
+            *ngFor="let record of filteredRecords()"
+            (click)="selectRecordForEdit(record)"
+            class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 active:scale-[0.99] transition cursor-pointer"
+          >
+            <div class="flex items-start justify-between gap-2">
+              <div class="space-y-1">
+                <span class="text-xs text-slate-500 dark:text-slate-400 font-mono">{{ record.fechaString }}</span>
+                <h4 class="text-sm font-semibold text-slate-900 dark:text-white leading-snug">{{ record.name }}</h4>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <div
+                  class="text-sm font-bold font-mono"
+                  [ngClass]="record.tipo === 'Ingreso' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100'"
                 >
                   {{ record.tipo === 'Ingreso' ? '+' : '-' }}{{ record.cantidad | number : '1.2-2' }} €
-                </span>
-              </td>
-              <td class="py-3.5 px-3 text-center text-slate-500 group-hover:text-cyan-400 transition">
-                <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </div>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">{{ record.tipo }}</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2.5 mt-2 border-t border-slate-200 dark:border-slate-800/80">
+              <span
+                class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-lg text-[10px] font-medium border"
+                [style.border-color]="getCategoryColor(record.categoria) + '40'"
+                [style.background-color]="getCategoryColor(record.categoria) + '15'"
+                [style.color]="getCategoryColor(record.categoria)"
+              >
+                <span class="w-1.5 h-1.5 rounded-full" [style.background-color]="getCategoryColor(record.categoria)"></span>
+                <span>{{ record.categoria }}</span>
+              </span>
+
+              <span class="text-xs text-cyan-600 dark:text-cyan-400 font-medium flex items-center space-x-0.5">
+                <span>Editar</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-              </td>
-            </tr>
-            <tr *ngIf="filteredRecords().length === 0">
-              <td colspan="6" class="py-10 text-center text-slate-500">
-                No hay movimientos que coincidan con los filtros aplicados.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </span>
+            </div>
+          </div>
+
+          <div *ngIf="filteredRecords().length === 0" class="py-10 text-center text-slate-500 text-xs">
+            No hay movimientos que coincidan con los filtros aplicados.
+          </div>
+        </div>
+
+        <!-- Desktop & Ultrawide Table View (hidden on mobile, visible on md+) -->
+        <div class="hidden md:block overflow-x-auto">
+          <table class="w-full text-left text-xs 2xl:text-sm text-slate-700 dark:text-slate-300">
+            <thead class="text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+              <tr>
+                <th scope="col" class="py-3 px-4 rounded-l-xl">Fecha</th>
+                <th scope="col" class="py-3 px-4">Concepto</th>
+                <th scope="col" class="py-3 px-4">Categoría</th>
+                <th scope="col" class="py-3 px-4">Tipo</th>
+                <th scope="col" class="py-3 px-4 text-right">Cantidad</th>
+                <th scope="col" class="py-3 px-3 text-center rounded-r-xl w-10"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800/60">
+              <tr
+                *ngFor="let record of filteredRecords()"
+                (click)="selectRecordForEdit(record)"
+                class="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition group cursor-pointer"
+                title="Haz clic para editar este movimiento"
+              >
+                <td class="py-3.5 px-4 font-mono text-slate-500 dark:text-slate-400">
+                  {{ record.fechaString }}
+                </td>
+                <td class="py-3.5 px-4 font-medium text-slate-900 dark:text-slate-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition">
+                  {{ record.name }}
+                </td>
+                <td class="py-3.5 px-4">
+                  <span
+                    class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-[11px] 2xl:text-xs font-medium border"
+                    [style.border-color]="getCategoryColor(record.categoria) + '40'"
+                    [style.background-color]="getCategoryColor(record.categoria) + '15'"
+                    [style.color]="getCategoryColor(record.categoria)"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" [style.background-color]="getCategoryColor(record.categoria)"></span>
+                    <span>{{ record.categoria }}</span>
+                  </span>
+                </td>
+                <td class="py-3.5 px-4">
+                  <span
+                    class="px-2.5 py-0.5 rounded-md text-[11px] 2xl:text-xs font-medium border"
+                    [ngClass]="{
+                      'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20': record.tipo === 'Ingreso',
+                      'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20': record.tipo === 'Gasto recurrente',
+                      'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400 border-slate-300 dark:border-slate-700': record.tipo === 'Gasto único'
+                    }"
+                  >
+                    {{ record.tipo }}
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right font-mono font-semibold text-sm 2xl:text-base">
+                  <span
+                    [ngClass]="record.tipo === 'Ingreso' ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-slate-100'"
+                  >
+                    {{ record.tipo === 'Ingreso' ? '+' : '-' }}{{ record.cantidad | number : '1.2-2' }} €
+                  </span>
+                </td>
+                <td class="py-3.5 px-3 text-center text-slate-400 dark:text-slate-500 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition">
+                  <svg class="w-4 h-4 opacity-0 group-hover:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </td>
+              </tr>
+              <tr *ngIf="filteredRecords().length === 0">
+                <td colspan="6" class="py-10 text-center text-slate-500">
+                  No hay movimientos que coincidan con los filtros aplicados.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+    </ng-container>
 
   </div>
 

@@ -37,6 +37,13 @@ describe('DashboardComponent', () => {
     expect(component.allRecords().length).toBeGreaterThan(0);
   });
 
+  it('should render skeleton loading state when notionService.isLoading is true', () => {
+    notionService.isLoading.set(true);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelectorAll('.animate-pulse').length).toBeGreaterThan(0);
+  });
+
   it('should compute stats accurately for income, expenses, balance and savings rate', () => {
     const today = new Date();
     const currentYear = today.getFullYear();

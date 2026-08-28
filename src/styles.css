@@ -1,3 +1,33 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Base cursor for non-interactive elements */
+*, *::before, *::after {
+  cursor: default;
+}
+
+/* Text inputs */
+input, textarea, [contenteditable="true"] {
+  cursor: text !important;
+}
+
+/* Clickable interactive elements and all their descendants */
+button,
+button *,
+a,
+a *,
+select,
+select *,
+summary,
+[role="button"],
+[role="button"] *,
+.cursor-pointer,
+.cursor-pointer *,
+tbody tr,
+tbody tr * {
+  cursor: pointer !important;
+}
+

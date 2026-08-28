@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotionService } from '../../services/notion.service';
+import { ThemeService } from '../../services/theme.service';
 import {
   FinancialRecord,
   FinancialStats,
@@ -51,6 +52,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 })
 export class DashboardComponent implements OnInit {
   notionService = inject(NotionService);
+  themeService = inject(ThemeService);
 
   allRecords = signal<FinancialRecord[]>([]);
   timeRange = signal<TimeRangeFilter>('current_month');

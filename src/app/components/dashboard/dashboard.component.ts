@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotionService } from '../../services/notion.service';
 import { ThemeService } from '../../services/theme.service';
+import { ToastService } from '../../services/toast.service';
 import {
   FinancialRecord,
   FinancialStats,
@@ -53,6 +54,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 export class DashboardComponent implements OnInit {
   notionService = inject(NotionService);
   themeService = inject(ThemeService);
+  toastService = inject(ToastService);
 
   allRecords = signal<FinancialRecord[]>([]);
   timeRange = signal<TimeRangeFilter>('current_month');
@@ -220,29 +222,37 @@ export class DashboardComponent implements OnInit {
     this.loadData();
   }
 
-  loadData() {
+  loadData(isUserAction = false) {
     if (this.notionService.hasConfiguredCredentials()) {
       this.usingMockData.set(false);
       this.notionService.fetchDatabaseRecords().subscribe({
         next: (records) => {
           this.allRecords.set(records);
+          if (isUserAction) {
+            this.toastService.success('Datos sincronizados correctamente con Notion');
+          }
         },
         error: (err) => {
           console.warn('Fallback a datos de demostración tras error:', err);
           this.usingMockData.set(true);
           this.allRecords.set(this.notionService.getMockRecords());
+          this.toastService.error(err?.message || 'Error al conectar con Notion. Mostrando demo');
         },
       });
     } else {
       this.usingMockData.set(true);
       this.allRecords.set(this.notionService.getMockRecords());
+      if (isUserAction) {
+        this.toastService.info('Modo Demo: usando datos de ejemplo');
+      }
     }
   }
 
   onSaveConfig(event: { token: string; dbId: string }) {
     this.notionService.saveConfig(event.token, event.dbId);
     this.showConfigModal.set(false);
-    this.loadData();
+    this.toastService.success('Configuración guardada correctamente');
+    this.loadData(true);
   }
 
   selectRecordForEdit(record: FinancialRecord) {
@@ -250,6 +260,8 @@ export class DashboardComponent implements OnInit {
   }
 
   onSaveRecord(updatedRecord: FinancialRecord) {
+    const previousRecords = this.allRecords();
+
     // 1. Actualización optimista local
     this.allRecords.update((records) =>
       records.map((r) => (r.id === updatedRecord.id ? updatedRecord : r))
@@ -263,15 +275,25 @@ export class DashboardComponent implements OnInit {
           this.allRecords.update((records) =>
             records.map((r) => (r.id === syncedRecord.id ? syncedRecord : r))
           );
+          this.toastService.success(`Movimiento "${updatedRecord.name}" actualizado en Notion`);
         },
         error: (err) => {
           console.error('Error al guardar en Notion:', err);
+          // Rollback en caso de fallo
+          this.allRecords.set(previousRecords);
+          this.toastService.error(`No se pudo actualizar el movimiento: ${err?.message || 'Error de conexión'}`);
         },
       });
+    } else {
+      this.toastService.success(`Movimiento "${updatedRecord.name}" guardado (Modo local)`);
     }
   }
 
   onDeleteRecord(recordId: string) {
+    const previousRecords = this.allRecords();
+    const recordToDelete = previousRecords.find((r) => r.id === recordId);
+    const recordName = recordToDelete?.name || 'Movimiento';
+
     // 1. Eliminación optimista local
     this.allRecords.update((records) =>
       records.filter((r) => r.id !== recordId)
@@ -282,12 +304,17 @@ export class DashboardComponent implements OnInit {
     if (this.notionService.hasConfiguredCredentials() && !this.usingMockData()) {
       this.notionService.deleteRecord(recordId).subscribe({
         next: () => {
-          // Registro archivado con éxito en Notion
+          this.toastService.success(`"${recordName}" eliminado de Notion`);
         },
         error: (err) => {
           console.error('Error al eliminar en Notion:', err);
+          // Rollback en caso de fallo
+          this.allRecords.set(previousRecords);
+          this.toastService.error(`No se pudo eliminar el movimiento: ${err?.message || 'Error de conexión'}`);
         },
       });
+    } else {
+      this.toastService.success(`"${recordName}" eliminado (Modo local)`);
     }
   }
 
@@ -309,11 +336,17 @@ export class DashboardComponent implements OnInit {
           this.allRecords.update((records) =>
             records.map((r) => (r.id === tempId ? createdRecord : r))
           );
+          this.toastService.success(`Movimiento "${newRecordData.name}" creado en Notion`);
         },
         error: (err) => {
           console.error('Error al crear página en Notion:', err);
+          // Rollback en caso de fallo
+          this.allRecords.update((records) => records.filter((r) => r.id !== tempId));
+          this.toastService.error(`Error al crear el movimiento en Notion: ${err?.message || 'Error de conexión'}`);
         },
       });
+    } else {
+      this.toastService.success(`Movimiento "${newRecordData.name}" creado (Modo local)`);
     }
   }
 

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { throwError } from 'rxjs';
 import { DashboardComponent } from './dashboard.component';
 import { NotionService } from '../../services/notion.service';
 import { FinancialRecord } from '../../models/financial-record.model';
@@ -221,5 +222,36 @@ describe('DashboardComponent', () => {
     expect(component.allRecords().length).toBe(1);
     expect(component.allRecords()[0].name).toBe('Nuevo Test');
     expect(component.allRecords()[0].cantidad).toBe(120);
+  });
+
+  it('should trigger toast notification on user loadData and handle backend rollback on update failure', () => {
+    const toastInfoSpy = vi.spyOn(component.toastService, 'info');
+    const toastErrorSpy = vi.spyOn(component.toastService, 'error');
+
+    component.loadData(true);
+    expect(toastInfoSpy).toHaveBeenCalledWith('Modo Demo: usando datos de ejemplo');
+
+    // Simulate backend update failure
+    const originalRecord: FinancialRecord = {
+      id: 'rec-test-fail',
+      name: 'Gasto Original',
+      cantidad: 10,
+      categoria: 'Comida',
+      tipo: 'Gasto único',
+      fecha: new Date(),
+      fechaString: '26/8/2026',
+    };
+    component.allRecords.set([originalRecord]);
+    component.usingMockData.set(false);
+    vi.spyOn(notionService, 'hasConfiguredCredentials').mockReturnValue(true);
+    vi.spyOn(notionService, 'updateRecord').mockReturnValue(
+      throwError(() => new Error('Network error'))
+    );
+
+    component.onSaveRecord({ ...originalRecord, name: 'Gasto Modificado Invalido' });
+
+    expect(toastErrorSpy).toHaveBeenCalled();
+    // Rollback check: original record should be restored
+    expect(component.allRecords()[0].name).toBe('Gasto Original');
   });
 });

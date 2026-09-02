@@ -91,6 +91,9 @@ describe('DashboardComponent', () => {
     expect(stats.balanceNeto).toBe(1000);
     expect(stats.tasaAhorro).toBe(50);
     expect(stats.categoryBreakdown.length).toBe(2);
+    expect(stats.monthlyBreakdown.length).toBe(1);
+    expect(stats.monthlyBreakdown[0].ingresos).toBe(2000);
+    expect(stats.monthlyBreakdown[0].gastos).toBe(1000);
   });
 
   it('should filter records by time interval, category, and search query', () => {
@@ -134,9 +137,28 @@ describe('DashboardComponent', () => {
     component.timeRange.set('current_month');
     expect(component.filteredRecords().length).toBe(2);
 
-    // Filtro por categoría
-    component.selectedCategory.set('Comida');
+    // Filtro mes pasado
+    const lastMonthDate = new Date(currentYear, currentMonth - 1, 15);
+    component.allRecords.update((records) => [
+      ...records,
+      {
+        id: '4',
+        name: 'Gasto Mes Pasado',
+        cantidad: 45,
+        categoria: 'Comida',
+        fecha: lastMonthDate,
+        fechaString: `15/${lastMonthDate.getMonth() + 1}/${lastMonthDate.getFullYear()}`,
+        tipo: 'Gasto único',
+      },
+    ]);
+    component.timeRange.set('last_month');
     expect(component.filteredRecords().length).toBe(1);
+    expect(component.filteredRecords()[0].name).toBe('Gasto Mes Pasado');
+
+    // Filtro por categoría
+    component.timeRange.set('all');
+    component.selectedCategory.set('Comida');
+    expect(component.filteredRecords().length).toBe(2);
     expect(component.filteredRecords()[0].categoria).toBe('Comida');
 
     // Filtro por búsqueda

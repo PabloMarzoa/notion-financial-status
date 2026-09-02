@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.8] - 2026-09-02
+
+### Fixed
+- **Responsive Top & Bottom Padding**: Preserved standard responsive paddings on desktop/tablet/mobile screens while combining with `env(safe-area-inset-top)` and `env(safe-area-inset-bottom)` via CSS `calc()` in `.pt-safe` and `.pb-safe`.
+
+---
+
+## [0.0.7] - 2026-09-02
+
+### Changed
+- **Monthly Evolution Grouping**: Grouped monthly evolution comparison directly by the selected time range intervals (e.g. 1 month for current/last month, 3 groups for last 3 months, etc.) in chronological order.
+
+---
+
+## [0.0.6] - 2026-09-02
+
+### Changed
+- **Monthly Evolution Window**: Changed monthly evolution chart computation to consistently display the last 4 calendar months (in chronological order) regardless of the specific time filter selected for the KPI summary cards.
+
+---
+
+## [0.0.5] - 2026-09-02
+
+### Fixed
+- **iOS Home Screen Safe Area Padding**: Added `env(safe-area-inset-top)` / `env(safe-area-inset-bottom)` utilities to prevent header from clipping under the iOS dynamic island / status bar when launched from the Home Screen.
+
+---
+
+## [0.0.4] - 2026-09-02
+
+### Added
+- **Previous Month Filter**: Added `"Mes pasado"` (`last_month`) option to time range dropdown filters and computed signals in dashboard.
+
+---
+
 ## [0.0.3] - 2026-08-31
 
 ### Added

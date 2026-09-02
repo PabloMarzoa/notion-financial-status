@@ -53,6 +53,7 @@ export interface FinancialRecord {
 
 export type TimeRangeFilter =
   | 'current_month'
+  | 'last_month'
   | 'last_3_months'
   | 'last_6_months'
   | 'last_12_months'

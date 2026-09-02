@@ -88,6 +88,9 @@ export class DashboardComponent implements OnInit {
         if (recYear !== currentYear || recMonth !== currentMonth) {
           return false;
         }
+      } else if (range === 'last_month') {
+        const diffMonths = (currentYear - recYear) * 12 + (currentMonth - recMonth);
+        if (diffMonths !== 1) return false;
       } else if (range === 'last_3_months') {
         const diffMonths = (currentYear - recYear) * 12 + (currentMonth - recMonth);
         if (diffMonths < 0 || diffMonths >= 3) return false;
@@ -152,11 +155,11 @@ export class DashboardComponent implements OnInit {
         catMap.set(rec.categoria, currentCat);
       }
 
-      // Acumular mensual
+      // Acumular mensual para el intervalo seleccionado
       const recDate = new Date(rec.fecha);
       const monthKey = `${recDate.getFullYear()}-${String(recDate.getMonth() + 1).padStart(2, '0')}`;
       const monthLabel = recDate.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
-      
+
       const currentMonthData = monthMap.get(monthKey) || { label: monthLabel, ingresos: 0, gastos: 0 };
       if (rec.tipo === 'Ingreso') {
         currentMonthData.ingresos += rec.cantidad;
@@ -184,7 +187,7 @@ export class DashboardComponent implements OnInit {
       })
       .sort((a, b) => b.total - a.total);
 
-    // Breakdown mensual ordenado cronológicamente
+    // Breakdown mensual ordenado cronológicamente según los meses del intervalo seleccionado
     const monthlyBreakdown = Array.from(monthMap.entries())
       .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
       .map(([monthKey, data]) => ({

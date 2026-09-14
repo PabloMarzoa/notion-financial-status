@@ -52,4 +52,22 @@ describe('ThemeService', () => {
     expect(service.currentTheme()).toBe('light');
     expect(localStorage.getItem('finanzas_theme_preference')).toBeNull();
   });
+
+  it('should handle matchMedia system preference when localStorage is empty', () => {
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes('light'),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    service = TestBed.inject(ThemeService);
+    expect(service.currentTheme()).toBe('light');
+    window.matchMedia = originalMatchMedia;
+  });
 });

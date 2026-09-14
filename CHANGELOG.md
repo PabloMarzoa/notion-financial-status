@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2026-09-14
+
+### Added
+- **SEO & Pre-rendering (SSG/SSR)**: Configured static site pre-rendering via `@angular/ssr` and Angular application builder (`main.server.ts`, `app.config.server.ts`).
+- **Demo Mode Pre-rendering**: Publicly pre-rendered HTML includes full interactive demo data and KPI statistics so search engines and social crawlers can index real content without blank screens.
+- **Dynamic SEO Service**: Implemented `SeoService` to manage page titles, meta descriptions, Open Graph, Twitter Cards, canonical link, and Schema.org `WebApplication` JSON-LD structured data.
+- **Search Engine Discovery**: Added `robots.txt` and `sitemap.xml` in public assets.
+- **Platform-Safe APIs**: Refactored `ThemeService` and `NotionService` with `PLATFORM_ID` and `isPlatformBrowser` guards to ensure safe SSR execution in Node.js environments.
+- **Client Hydration**: Enabled non-destructive client hydration via `provideClientHydration()`.
+
+---
+
 ## [0.0.8] - 2026-09-02
 
 ### Fixed

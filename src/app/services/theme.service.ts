@@ -1,4 +1,5 @@
-import { Injectable, signal, effect } from '@angular/core';
+import { Injectable, signal, effect, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 export type ThemeMode = 'light' | 'dark';
 
@@ -8,12 +9,15 @@ const STORAGE_KEY_THEME = 'finanzas_theme_preference';
   providedIn: 'root',
 })
 export class ThemeService {
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+
   readonly currentTheme = signal<ThemeMode>(this.getInitialTheme());
 
   constructor() {
     this.applyTheme(this.currentTheme());
 
-    if (typeof window !== 'undefined' && window.matchMedia) {
+    if (this.isBrowser && typeof window !== 'undefined' && window.matchMedia) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       mediaQuery.addEventListener('change', (e) => {
         const stored = localStorage?.getItem(STORAGE_KEY_THEME);
@@ -30,7 +34,7 @@ export class ThemeService {
   }
 
   private getInitialTheme(): ThemeMode {
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (this.isBrowser && typeof window !== 'undefined' && window.localStorage) {
       const stored = localStorage.getItem(STORAGE_KEY_THEME) as ThemeMode | null;
       if (stored === 'light' || stored === 'dark') {
         return stored;
@@ -48,7 +52,7 @@ export class ThemeService {
   setTheme(theme: ThemeMode, persist = true): void {
     this.currentTheme.set(theme);
     this.applyTheme(theme);
-    if (persist && typeof window !== 'undefined' && window.localStorage) {
+    if (persist && this.isBrowser && typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem(STORAGE_KEY_THEME, theme);
     }
   }
@@ -59,7 +63,7 @@ export class ThemeService {
   }
 
   private applyTheme(theme: ThemeMode): void {
-    if (typeof document !== 'undefined') {
+    if (this.isBrowser && typeof document !== 'undefined') {
       const root = document.documentElement;
       if (theme === 'dark') {
         root.classList.add('dark');
@@ -71,3 +75,4 @@ export class ThemeService {
     }
   }
 }
+

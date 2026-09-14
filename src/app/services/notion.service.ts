@@ -1,5 +1,6 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { isPlatformBrowser } from '@angular/common';
 import { Observable, catchError, map, of, throwError } from 'rxjs';
 import { FinancialRecord, TransactionType, Category } from '../models/financial-record.model';
 
@@ -12,6 +13,8 @@ const STORAGE_KEY_DB_ID = 'finanzas_notion_db_id';
 })
 export class NotionService {
   private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
 
   readonly apiKey = signal<string>(this.getStoredApiKey());
   readonly databaseId = signal<string>(this.getStoredDatabaseId());
@@ -22,14 +25,14 @@ export class NotionService {
   private lastPropertiesSchema: Record<string, any> = {};
 
   private getStoredApiKey(): string {
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (this.isBrowser && typeof window !== 'undefined' && window.localStorage) {
       return localStorage.getItem(STORAGE_KEY_TOKEN) || '';
     }
     return '';
   }
 
   private getStoredDatabaseId(): string {
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (this.isBrowser && typeof window !== 'undefined' && window.localStorage) {
       return localStorage.getItem(STORAGE_KEY_DB_ID) || '';
     }
     return '';
@@ -39,7 +42,7 @@ export class NotionService {
     const cleanToken = token.trim();
     const cleanDbId = dbId.trim();
 
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (this.isBrowser && typeof window !== 'undefined' && window.localStorage) {
       if (cleanToken) {
         localStorage.setItem(STORAGE_KEY_TOKEN, cleanToken);
       } else {

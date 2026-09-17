@@ -279,6 +279,7 @@ describe('DashboardComponent', () => {
       throwError(() => new Error('Network error'))
     );
 
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     component.onSaveRecord({ ...originalRecord, name: 'Gasto Modificado Invalido' });
 
     expect(toastErrorSpy).toHaveBeenCalled();

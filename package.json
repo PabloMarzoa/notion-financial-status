@@ -1,6 +1,6 @@
 {
   "name": "finanzas",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -12,7 +12,7 @@
     "test:ci": "ng test --coverage --watch=false"
   },
   "private": true,
-  "packageManager": "npm@11.12.1",
+  "packageManager": "pnpm@12.4.2",
   "dependencies": {
     "@angular/common": "^22.1.0",
     "@angular/compiler": "^22.1.0",

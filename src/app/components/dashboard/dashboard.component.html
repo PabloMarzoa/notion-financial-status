@@ -23,7 +23,7 @@
           class="flex items-center space-x-2 px-3 py-1.5 rounded-xl border text-[11px] sm:text-xs font-medium backdrop-blur-md"
           [ngClass]="
             usingMockData()
-              ? 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300'
+              ? 'demo-mode-element bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300'
               : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
           "
         >
@@ -96,7 +96,7 @@
     <!-- Demo Mode Banner with link to GitHub README instructions -->
     <div
       *ngIf="usingMockData()"
-      class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white dark:via-slate-900 to-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs sm:text-sm shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fade-in relative overflow-hidden"
+      class="demo-mode-element p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-white dark:via-slate-900 to-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs sm:text-sm shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 animate-fade-in relative overflow-hidden"
     >
       <div class="flex items-start sm:items-center space-x-3.5">
         <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-600 dark:text-amber-300 flex items-center justify-center flex-shrink-0 mt-0.5 sm:mt-0 shadow-sm">
@@ -370,7 +370,11 @@
       </div>
 
       <!-- Charts Section (Expanded width support on Ultrawide screens) -->
-      <app-charts [stats]="stats()"></app-charts>
+      <app-charts
+        [stats]="stats()"
+        [selectedCategory]="selectedCategory()"
+        (categorySelect)="onCategorySelect($event)"
+      ></app-charts>
 
       <!-- Table & Mobile List of Transactions -->
       <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl backdrop-blur-md mt-6 sm:mt-8">

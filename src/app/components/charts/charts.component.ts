@@ -1,4 +1,4 @@
-import { Component, Input, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CategorySummary, FinancialStats } from '../../models/financial-record.model';
 
@@ -28,8 +28,13 @@ import { CategorySummary, FinancialStats } from '../../models/financial-record.m
               *ngFor="let cat of stats!.categoryBreakdown"
               [style.width.%]="cat.percentage"
               [style.background-color]="cat.color"
-              [title]="cat.category + ': ' + cat.percentage + '% (' + cat.total.toFixed(2) + '€)'"
-              class="h-full transition-all duration-500 hover:opacity-80 relative group"
+              [title]="cat.category + ': ' + cat.percentage + '% (' + cat.total.toFixed(2) + '€) - Clic para filtrar'"
+              (click)="onCategoryClick(cat.category)"
+              class="h-full transition-all duration-500 hover:opacity-80 relative group cursor-pointer"
+              [ngClass]="{
+                'ring-2 ring-inset ring-white dark:ring-slate-950 scale-y-110 z-10': selectedCategory.toLowerCase() === cat.category.toLowerCase(),
+                'opacity-40': selectedCategory !== 'all' && selectedCategory.toLowerCase() !== cat.category.toLowerCase()
+              }"
             ></div>
           </div>
 
@@ -37,12 +42,34 @@ import { CategorySummary, FinancialStats } from '../../models/financial-record.m
           <div class="space-y-2.5 sm:space-y-3 max-h-72 sm:max-h-80 2xl:max-h-96 overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
             <div
               *ngFor="let cat of stats!.categoryBreakdown"
-              class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800/80 transition"
+              (click)="onCategoryClick(cat.category)"
+              class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl border transition cursor-pointer active:scale-[0.99] group"
+              [ngClass]="
+                selectedCategory.toLowerCase() === cat.category.toLowerCase()
+                  ? 'bg-emerald-500/10 border-emerald-500/50 shadow-sm ring-1 ring-emerald-500/30 dark:bg-emerald-500/15'
+                  : 'bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800/80 border-slate-200 dark:border-slate-800/80'
+              "
+              [title]="selectedCategory.toLowerCase() === cat.category.toLowerCase() ? 'Clic para quitar filtro de ' + cat.category : 'Clic para filtrar por ' + cat.category"
             >
               <div class="flex items-center space-x-2.5 sm:space-x-3">
                 <span class="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-md shadow-sm flex-shrink-0" [style.background-color]="cat.color"></span>
-                <span class="text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-200 truncate max-w-[120px] sm:max-w-[180px] 2xl:max-w-none">{{ cat.category }}</span>
+                <span
+                  class="text-xs sm:text-sm font-medium truncate max-w-[120px] sm:max-w-[180px] 2xl:max-w-none transition-colors"
+                  [ngClass]="
+                    selectedCategory.toLowerCase() === cat.category.toLowerCase()
+                      ? 'text-emerald-700 dark:text-emerald-300 font-semibold'
+                      : 'text-slate-800 dark:text-slate-200 group-hover:text-slate-950 dark:group-hover:text-white'
+                  "
+                >
+                  {{ cat.category }}
+                </span>
                 <span class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">({{ cat.count }} movs)</span>
+                <span
+                  *ngIf="selectedCategory.toLowerCase() === cat.category.toLowerCase()"
+                  class="px-1.5 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded border border-emerald-500/30 uppercase tracking-wider"
+                >
+                  Filtro activo
+                </span>
               </div>
               <div class="text-right flex-shrink-0">
                 <div class="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white font-mono">{{ cat.total | number : '1.2-2' }} €</div>
@@ -151,6 +178,12 @@ import { CategorySummary, FinancialStats } from '../../models/financial-record.m
 })
 export class ChartsComponent {
   @Input() stats: FinancialStats | null = null;
+  @Input() selectedCategory = 'all';
+  @Output() categorySelect = new EventEmitter<string>();
+
+  onCategoryClick(category: string): void {
+    this.categorySelect.emit(category);
+  }
 
   maxMonthlyAmount = computed(() => {
     if (!this.stats?.monthlyBreakdown) return 100;

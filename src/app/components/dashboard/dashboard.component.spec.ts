@@ -38,6 +38,15 @@ describe('DashboardComponent', () => {
     expect(component.allRecords().length).toBeGreaterThan(0);
   });
 
+  it('should not show demo mode initially when credentials exist', () => {
+    notionService.apiKey.set('test-token');
+    notionService.databaseId.set('test-db');
+
+    const credFixture = TestBed.createComponent(DashboardComponent);
+    const credComponent = credFixture.componentInstance;
+    expect(credComponent.usingMockData()).toBe(false);
+  });
+
   it('should render skeleton loading state when notionService.isLoading is true', () => {
     notionService.isLoading.set(true);
     fixture.detectChanges();

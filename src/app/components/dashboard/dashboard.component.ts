@@ -64,7 +64,7 @@ export class DashboardComponent implements OnInit {
   showConfigModal = signal<boolean>(false);
   showCreateModal = signal<boolean>(false);
   selectedRecordForEdit = signal<FinancialRecord | null>(null);
-  usingMockData = signal<boolean>(false);
+  usingMockData = signal<boolean>(!this.notionService.hasConfiguredCredentials());
 
   // Filtro reactivo de registros
   filteredRecords = computed(() => {

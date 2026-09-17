@@ -41,6 +41,19 @@
 
   <!-- Web App Manifest (Android / PWA Home Screen) -->
   <link rel="manifest" href="/manifest.json?v=2">
+
+  <script>
+    try {
+      if (localStorage.getItem('finanzas_notion_api_token') && localStorage.getItem('finanzas_notion_db_id')) {
+        document.documentElement.classList.add('has-notion-credentials');
+      }
+    } catch (e) {}
+  </script>
+  <style>
+    html.has-notion-credentials .demo-mode-element {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
   <app-root></app-root>

@@ -54,6 +54,14 @@ export class NotionService {
       } else {
         localStorage.removeItem(STORAGE_KEY_DB_ID);
       }
+
+      if (typeof document !== 'undefined') {
+        if (cleanToken && cleanDbId) {
+          document.documentElement.classList.add('has-notion-credentials');
+        } else {
+          document.documentElement.classList.remove('has-notion-credentials');
+        }
+      }
     }
 
     this.apiKey.set(cleanToken);

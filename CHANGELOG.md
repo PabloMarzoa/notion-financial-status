@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-09-17
+
+### Fixed
+- **Prevent Demo Mode Flash on SSG Load**: Added immediate `<head>` check in `index.html` that marks `html.has-notion-credentials` before initial render, hiding pre-rendered SSG demo banners and demo badge immediately if Notion credentials exist in `localStorage`.
+
+---
+
+## [0.1.2] - 2026-09-17
+
+### Fixed
+- **Initial Load State**: Prevented brief flicker of Demo mode (banner and status badge) on application load when Notion credentials are already configured in local storage.
+
+---
+
+## [0.1.1] - 2026-09-17
+
+### Added
+- **Feature Branch CI Workflow**: Added `.github/workflows/feature-ci.yml` to automatically run `pnpm install`, coverage tests, and `pnpm run build` on `feature/**` pushes and PRs.
+
+### Changed
+- **Package Manager**: Switched package manager from `npm` to `pnpm` (`v12.4.2`), generating `pnpm-lock.yaml` and updating [angular.json](file:///Users/pmarzoa/dev/finanzas/angular.json), [Dockerfile](file:///Users/pmarzoa/dev/finanzas/Dockerfile), [AGENTS.md](file:///Users/pmarzoa/dev/finanzas/AGENTS.md), and skills.
+
+---
+
 ## [0.1.0] - 2026-09-14
 
 ### Added

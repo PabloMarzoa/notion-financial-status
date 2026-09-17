@@ -258,6 +258,14 @@ export class DashboardComponent implements OnInit {
     this.loadData(true);
   }
 
+  onCategorySelect(category: string) {
+    if (this.selectedCategory().toLowerCase() === category.toLowerCase()) {
+      this.selectedCategory.set('all');
+    } else {
+      this.selectedCategory.set(category);
+    }
+  }
+
   selectRecordForEdit(record: FinancialRecord) {
     this.selectedRecordForEdit.set({ ...record });
   }

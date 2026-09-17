@@ -13,7 +13,7 @@ Before performing any `git commit`, `git push`, or delivering code changes:
 ## 1. Mandatory Pre-Commit Execution Rule
 Always execute the automated test suite with coverage enabled:
 ```bash
-npm run test:coverage
+pnpm run test:coverage
 ```
 
 ## 2. Acceptance Criteria
@@ -25,5 +25,5 @@ npm run test:coverage
 ## 3. Coverage Verification Script
 Run the CI validation command:
 ```bash
-npm run test:ci
+pnpm run test:ci
 ```

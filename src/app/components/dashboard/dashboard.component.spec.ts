@@ -38,6 +38,15 @@ describe('DashboardComponent', () => {
     expect(component.allRecords().length).toBeGreaterThan(0);
   });
 
+  it('should not show demo mode initially when credentials exist', () => {
+    notionService.apiKey.set('test-token');
+    notionService.databaseId.set('test-db');
+
+    const credFixture = TestBed.createComponent(DashboardComponent);
+    const credComponent = credFixture.componentInstance;
+    expect(credComponent.usingMockData()).toBe(false);
+  });
+
   it('should render skeleton loading state when notionService.isLoading is true', () => {
     notionService.isLoading.set(true);
     fixture.detectChanges();
@@ -275,5 +284,19 @@ describe('DashboardComponent', () => {
     expect(toastErrorSpy).toHaveBeenCalled();
     // Rollback check: original record should be restored
     expect(component.allRecords()[0].name).toBe('Gasto Original');
+  });
+
+  it('should toggle selectedCategory on onCategorySelect', () => {
+    component.selectedCategory.set('all');
+    component.onCategorySelect('Comida');
+    expect(component.selectedCategory()).toBe('Comida');
+
+    // Clicking again should toggle back to 'all'
+    component.onCategorySelect('Comida');
+    expect(component.selectedCategory()).toBe('all');
+
+    // Selecting another category sets it
+    component.onCategorySelect('Gasolina');
+    expect(component.selectedCategory()).toBe('Gasolina');
   });
 });

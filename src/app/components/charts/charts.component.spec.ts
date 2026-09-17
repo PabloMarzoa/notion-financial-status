@@ -64,4 +64,11 @@ describe('ChartsComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.textContent).toContain('No hay gastos registrados');
   });
+
+  it('should emit categorySelect when onCategoryClick is called', () => {
+    let emitted = '';
+    component.categorySelect.subscribe((cat) => (emitted = cat));
+    component.onCategoryClick('Comida');
+    expect(emitted).toBe('Comida');
+  });
 });

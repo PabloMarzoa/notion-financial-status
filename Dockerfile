@@ -4,19 +4,19 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Copy dependency definitions
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies using pnpm
+RUN corepack enable && pnpm install --frozen-lockfile
 
 # Copy project files
 COPY . .
 
 # Run pre-commit tests with coverage verification
-RUN npm run test:coverage
+RUN pnpm run test:coverage
 
 # Build the Angular production application
-RUN npm run build
+RUN pnpm run build
 
 # Stage 2: Production Runtime
 FROM node:22-alpine AS runner

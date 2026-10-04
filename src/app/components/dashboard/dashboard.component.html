@@ -176,7 +176,36 @@
           <option value="last_12_months">Últimos 12 meses</option>
           <option value="current_year">Año actual</option>
           <option value="all">Todo el histórico</option>
+          <option value="custom">Período personalizado</option>
         </select>
+
+        <!-- Custom Date Range Inputs -->
+        <ng-container *ngIf="timeRange() === 'custom'">
+          <div class="flex items-center gap-1.5 w-full sm:w-auto">
+            <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 py-1 text-xs">
+              <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Desde</span>
+              <input
+                type="date"
+                [ngModel]="customStartDate()"
+                (ngModelChange)="setCustomStartDate($event)"
+                [max]="customEndDate() || null"
+                class="bg-transparent text-slate-800 dark:text-slate-200 font-mono focus:outline-none text-xs cursor-pointer"
+                title="Fecha mínima"
+              />
+            </div>
+            <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 py-1 text-xs">
+              <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Hasta</span>
+              <input
+                type="date"
+                [ngModel]="customEndDate()"
+                (ngModelChange)="setCustomEndDate($event)"
+                [min]="customStartDate() || null"
+                class="bg-transparent text-slate-800 dark:text-slate-200 font-mono focus:outline-none text-xs cursor-pointer"
+                title="Fecha máxima"
+              />
+            </div>
+          </div>
+        </ng-container>
 
         <!-- Category filter -->
         <select

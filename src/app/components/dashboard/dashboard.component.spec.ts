@@ -353,9 +353,81 @@ describe('DashboardComponent', () => {
     expect(restoredComp.searchQuery()).toBe('Mercadona');
   });
 
+  it('should filter records by custom date range', () => {
+    const rec1: FinancialRecord = {
+      id: 'rec-1',
+      name: 'Compra 10 Mayo',
+      cantidad: 15,
+      categoria: 'Comida',
+      tipo: 'Gasto único',
+      fecha: new Date(2026, 4, 10),
+      fechaString: '10/05/2026',
+    };
+    const rec2: FinancialRecord = {
+      id: 'rec-2',
+      name: 'Compra 20 Mayo',
+      cantidad: 25,
+      categoria: 'Comida',
+      tipo: 'Gasto único',
+      fecha: new Date(2026, 4, 20),
+      fechaString: '20/05/2026',
+    };
+    const rec3: FinancialRecord = {
+      id: 'rec-3',
+      name: 'Compra 10 Junio',
+      cantidad: 35,
+      categoria: 'Comida',
+      tipo: 'Gasto único',
+      fecha: new Date(2026, 5, 10),
+      fechaString: '10/06/2026',
+    };
+
+    component.allRecords.set([rec1, rec2, rec3]);
+    component.timeRange.set('custom');
+    component.selectedCategory.set('all');
+    component.selectedType.set('all');
+    component.searchQuery.set('');
+
+    // Range: 2026-05-15 to 2026-05-25 (only rec2 matches)
+    component.setCustomStartDate('2026-05-15');
+    component.setCustomEndDate('2026-05-25');
+    expect(component.filteredRecords().length).toBe(1);
+    expect(component.filteredRecords()[0].id).toBe('rec-2');
+
+    // Only Start Date (2026-05-20 onwards -> rec2 and rec3)
+    component.setCustomStartDate('2026-05-20');
+    component.customEndDate.set('');
+    expect(component.filteredRecords().length).toBe(2);
+
+    // Only End Date (up to 2026-05-12 -> rec1)
+    component.customStartDate.set('');
+    component.setCustomEndDate('2026-05-12');
+    expect(component.filteredRecords().length).toBe(1);
+    expect(component.filteredRecords()[0].id).toBe('rec-1');
+  });
+
+  it('should enforce date limits between minimum and maximum date inputs', () => {
+    component.customStartDate.set('2026-05-10');
+    component.customEndDate.set('2026-05-20');
+
+    // Trying to set start date greater than end date caps it at end date
+    component.setCustomStartDate('2026-05-25');
+    expect(component.customStartDate()).toBe('2026-05-20');
+
+    // Valid start date change
+    component.setCustomStartDate('2026-05-05');
+    expect(component.customStartDate()).toBe('2026-05-05');
+
+    // Trying to set end date smaller than start date caps it at start date
+    component.setCustomEndDate('2026-05-01');
+    expect(component.customEndDate()).toBe('2026-05-05');
+  });
+
   it('should persist filter changes to localStorage via effect', () => {
     component.timeRange.set('last_year' as any); // fallback test or standard
-    component.setTimeRange('last_6_months');
+    component.setTimeRange('custom');
+    component.setCustomStartDate('2026-01-01');
+    component.setCustomEndDate('2026-02-01');
     component.selectedCategory.set('Gasolina');
     component.selectedType.set('Ingreso');
     component.searchQuery.set('Repsol');
@@ -363,7 +435,9 @@ describe('DashboardComponent', () => {
     fixture.detectChanges();
 
     const stored = JSON.parse(localStorage.getItem('finanzas_filters_state') || '{}');
-    expect(stored.timeRange).toBe('last_6_months');
+    expect(stored.timeRange).toBe('custom');
+    expect(stored.customStartDate).toBe('2026-01-01');
+    expect(stored.customEndDate).toBe('2026-02-01');
     expect(stored.selectedCategory).toBe('Gasolina');
     expect(stored.selectedType).toBe('Ingreso');
     expect(stored.searchQuery).toBe('Repsol');

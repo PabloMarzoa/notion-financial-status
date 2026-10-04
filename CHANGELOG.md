@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-04
+
+### Added
+- **Custom Date Range Filter**: Added a `custom` time range option allowing users to filter movements by specific start and end dates with date pickers, boundary validation, and reset capabilities.
+- **New Categories Support**: Added support for `Google`, `YouTube`, `Netflix`, `Préstamo personal`, `Apple`, and `Efectivo` in database schema, models, charts, and modal selectors.
+- **Notion Database Pagination**: Implemented recursive pagination in `NotionService` via `expand` and `reduce` operators to retrieve all database records beyond Notion's default 100-record limit.
+
+### Changed
+- **Unified Categories & Color Palette**: Centralized category definitions (`CATEGORIES_LIST`) and color assignments (`CATEGORY_COLORS`) in `financial-record.model.ts`, merging predefined categories with any dynamic record categories for dropdowns and filter selectors.
+
+---
+
 ## [0.2.0] - 2026-10-04
 
 ### Added

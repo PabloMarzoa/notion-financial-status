@@ -110,6 +110,7 @@ describe('NotionService', () => {
           },
         },
       ],
+      has_more: false,
     };
 
     const promise = new Promise<any[]>((resolve) => {
@@ -133,6 +134,60 @@ describe('NotionService', () => {
     expect(records[1].categoria).toBe('Comida');
     expect(records[1].tipo).toBe('Gasto único');
     expect(service.isConnected()).toBe(true);
+  });
+
+  it('should paginate through multiple pages when has_more is true', async () => {
+    service.saveConfig('secret_abc', 'db_pages');
+
+    const page1Response = {
+      results: [
+        {
+          id: 'page-1',
+          properties: {
+            Name: { type: 'title', title: [{ plain_text: 'Item 1' }] },
+            Cantidad: { type: 'number', number: 10 },
+            Categoría: { type: 'select', select: { name: 'Comida' } },
+            Tipo: { type: 'select', select: { name: 'Gasto único' } },
+            Fecha: { type: 'date', date: { start: '2026-08-01' } },
+          },
+        },
+      ],
+      has_more: true,
+      next_cursor: 'cursor_page_2',
+    };
+
+    const page2Response = {
+      results: [
+        {
+          id: 'page-2',
+          properties: {
+            Name: { type: 'title', title: [{ plain_text: 'Item 2' }] },
+            Cantidad: { type: 'number', number: 20 },
+            Categoría: { type: 'select', select: { name: 'Ocio' } },
+            Tipo: { type: 'select', select: { name: 'Gasto único' } },
+            Fecha: { type: 'date', date: { start: '2026-08-02' } },
+          },
+        },
+      ],
+      has_more: false,
+    };
+
+    const promise = new Promise<any[]>((resolve) => {
+      service.fetchDatabaseRecords().subscribe((records) => resolve(records));
+    });
+
+    const req1 = httpTesting.expectOne('/api/notion/databases/db_pages/query');
+    expect(req1.request.body).toEqual({});
+    req1.flush(page1Response);
+
+    const req2 = httpTesting.expectOne('/api/notion/databases/db_pages/query');
+    expect(req2.request.body).toEqual({ start_cursor: 'cursor_page_2' });
+    req2.flush(page2Response);
+
+    const records = await promise;
+    expect(records.length).toBe(2);
+    expect(records[0].name).toBe('Item 1');
+    expect(records[1].name).toBe('Item 2');
   });
 
   it('should handle API errors and set error message', async () => {

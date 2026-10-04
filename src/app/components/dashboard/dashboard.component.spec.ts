@@ -175,6 +175,17 @@ describe('DashboardComponent', () => {
     component.searchQuery.set('repsol');
     expect(component.filteredRecords().length).toBe(1);
     expect(component.filteredRecords()[0].name).toBe('Gasolina Repsol');
+    expect(component.hasActiveFilters()).toBe(true);
+
+    // Borrar filtros
+    component.clearFilters();
+    expect(component.timeRange()).toBe('current_month');
+    expect(component.selectedCategory()).toBe('all');
+    expect(component.selectedType()).toBe('all');
+    expect(component.searchQuery()).toBe('');
+    expect(component.customStartDate()).toBe('');
+    expect(component.customEndDate()).toBe('');
+    expect(component.hasActiveFilters()).toBe(false);
   });
 
   it('should update config and reload on onSaveConfig', () => {

@@ -451,6 +451,26 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  hasActiveFilters = computed(() => {
+    return (
+      this.timeRange() !== 'current_month' ||
+      this.selectedCategory() !== 'all' ||
+      this.selectedType() !== 'all' ||
+      this.searchQuery().trim() !== '' ||
+      this.customStartDate() !== '' ||
+      this.customEndDate() !== ''
+    );
+  });
+
+  clearFilters() {
+    this.timeRange.set('current_month');
+    this.selectedCategory.set('all');
+    this.selectedType.set('all');
+    this.searchQuery.set('');
+    this.customStartDate.set('');
+    this.customEndDate.set('');
+  }
+
   getCategoryColor(cat: string): string {
     return CATEGORY_COLORS[cat] || '#94a3b8';
   }

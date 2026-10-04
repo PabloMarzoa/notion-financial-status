@@ -185,7 +185,8 @@ describe('DashboardComponent', () => {
     expect(component.showConfigModal()).toBe(false);
   });
 
-  it('should select record for edit and update it locally on save', () => {
+  it('should select record for edit, reload data, and update it on save', () => {
+    const loadDataSpy = vi.spyOn(component, 'loadData');
     const initialRecord: FinancialRecord = {
       id: 'item-1',
       name: 'Compra Inicial',
@@ -209,12 +210,11 @@ describe('DashboardComponent', () => {
     component.onSaveRecord(modifiedRecord);
 
     expect(component.selectedRecordForEdit()).toBeNull();
-    const updated = component.allRecords().find((r) => r.id === 'item-1');
-    expect(updated?.name).toBe('Compra Editada');
-    expect(updated?.cantidad).toBe(35.5);
+    expect(loadDataSpy).toHaveBeenCalled();
   });
 
-  it('should remove record locally on onDeleteRecord', () => {
+  it('should remove record and reload data on onDeleteRecord', () => {
+    const loadDataSpy = vi.spyOn(component, 'loadData');
     const itemToDelete: FinancialRecord = {
       id: 'item-delete',
       name: 'Gasto a Eliminar',
@@ -231,7 +231,41 @@ describe('DashboardComponent', () => {
     component.onDeleteRecord('item-delete');
 
     expect(component.selectedRecordForEdit()).toBeNull();
-    expect(component.allRecords().length).toBe(0);
+    expect(loadDataSpy).toHaveBeenCalled();
+  });
+
+  it('should sort filteredRecords from newest to oldest by date', () => {
+    component.timeRange.set('all');
+    component.selectedCategory.set('all');
+    component.selectedType.set('all');
+    component.searchQuery.set('');
+
+    const olderRecord: FinancialRecord = {
+      id: 'old-1',
+      name: 'Viejo',
+      cantidad: 10,
+      categoria: 'Otros',
+      tipo: 'Gasto único',
+      fecha: new Date(2026, 0, 10),
+      fechaString: '10/01/2026',
+    };
+    const newerRecord: FinancialRecord = {
+      id: 'new-1',
+      name: 'Nuevo',
+      cantidad: 20,
+      categoria: 'Otros',
+      tipo: 'Gasto único',
+      fecha: new Date(2026, 5, 20),
+      fechaString: '20/06/2026',
+    };
+
+    // Set records in arbitrary/old-first order
+    component.allRecords.set([olderRecord, newerRecord]);
+
+    const sorted = component.filteredRecords();
+    expect(sorted.length).toBe(2);
+    expect(sorted[0].id).toBe('new-1');
+    expect(sorted[1].id).toBe('old-1');
   });
 
   it('should prepend new record locally on onCreateRecord', () => {
@@ -299,5 +333,39 @@ describe('DashboardComponent', () => {
     // Selecting another category sets it
     component.onCategorySelect('Gasolina');
     expect(component.selectedCategory()).toBe('Gasolina');
+  });
+
+  it('should restore filters from localStorage on initialization if present', () => {
+    const savedState = {
+      timeRange: 'last_3_months',
+      selectedCategory: 'Comida',
+      selectedType: 'Gasto único',
+      searchQuery: 'Mercadona',
+    };
+    localStorage.setItem('finanzas_filters_state', JSON.stringify(savedState));
+
+    const restoredFixture = TestBed.createComponent(DashboardComponent);
+    const restoredComp = restoredFixture.componentInstance;
+
+    expect(restoredComp.timeRange()).toBe('last_3_months');
+    expect(restoredComp.selectedCategory()).toBe('Comida');
+    expect(restoredComp.selectedType()).toBe('Gasto único');
+    expect(restoredComp.searchQuery()).toBe('Mercadona');
+  });
+
+  it('should persist filter changes to localStorage via effect', () => {
+    component.timeRange.set('last_year' as any); // fallback test or standard
+    component.setTimeRange('last_6_months');
+    component.selectedCategory.set('Gasolina');
+    component.selectedType.set('Ingreso');
+    component.searchQuery.set('Repsol');
+
+    fixture.detectChanges();
+
+    const stored = JSON.parse(localStorage.getItem('finanzas_filters_state') || '{}');
+    expect(stored.timeRange).toBe('last_6_months');
+    expect(stored.selectedCategory).toBe('Gasolina');
+    expect(stored.selectedType).toBe('Ingreso');
+    expect(stored.searchQuery).toBe('Repsol');
   });
 });

@@ -1,5 +1,5 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, signal, computed, effect, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotionService } from '../../services/notion.service';
 import { ThemeService } from '../../services/theme.service';
@@ -16,6 +16,15 @@ import { ChartsComponent } from '../charts/charts.component';
 import { ConfigModalComponent } from '../config-modal/config-modal.component';
 import { EditModalComponent } from '../edit-modal/edit-modal.component';
 import { CreateModalComponent } from '../create-modal/create-modal.component';
+
+const STORAGE_KEY_FILTERS = 'finanzas_filters_state';
+
+interface StoredFilters {
+  timeRange?: TimeRangeFilter;
+  selectedCategory?: string;
+  selectedType?: string;
+  searchQuery?: string;
+}
 
 const CATEGORY_COLORS: Record<string, string> = {
   Amazon: '#f59e0b',
@@ -52,19 +61,75 @@ const CATEGORY_COLORS: Record<string, string> = {
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+
   notionService = inject(NotionService);
   themeService = inject(ThemeService);
   toastService = inject(ToastService);
 
+  private storedFilters = this.loadStoredFilters();
+
   allRecords = signal<FinancialRecord[]>([]);
-  timeRange = signal<TimeRangeFilter>('current_month');
-  selectedCategory = signal<string>('all');
-  selectedType = signal<string>('all');
-  searchQuery = signal<string>('');
+  timeRange = signal<TimeRangeFilter>(this.storedFilters.timeRange || 'current_month');
+  selectedCategory = signal<string>(this.storedFilters.selectedCategory || 'all');
+  selectedType = signal<string>(this.storedFilters.selectedType || 'all');
+  searchQuery = signal<string>(this.storedFilters.searchQuery || '');
   showConfigModal = signal<boolean>(false);
   showCreateModal = signal<boolean>(false);
   selectedRecordForEdit = signal<FinancialRecord | null>(null);
   usingMockData = signal<boolean>(!this.notionService.hasConfiguredCredentials());
+
+  constructor() {
+    effect(() => {
+      const state: StoredFilters = {
+        timeRange: this.timeRange(),
+        selectedCategory: this.selectedCategory(),
+        selectedType: this.selectedType(),
+        searchQuery: this.searchQuery(),
+      };
+      this.saveStoredFilters(state);
+    });
+  }
+
+  private loadStoredFilters(): StoredFilters {
+    if (this.isBrowser && typeof window !== 'undefined' && window.localStorage) {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_FILTERS);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const validRanges: TimeRangeFilter[] = [
+            'current_month',
+            'last_month',
+            'last_3_months',
+            'last_6_months',
+            'last_12_months',
+            'current_year',
+            'all',
+          ];
+          return {
+            timeRange: validRanges.includes(parsed.timeRange) ? parsed.timeRange : 'current_month',
+            selectedCategory: typeof parsed.selectedCategory === 'string' ? parsed.selectedCategory : 'all',
+            selectedType: typeof parsed.selectedType === 'string' ? parsed.selectedType : 'all',
+            searchQuery: typeof parsed.searchQuery === 'string' ? parsed.searchQuery : '',
+          };
+        }
+      } catch (e) {
+        console.warn('Error reading stored filters:', e);
+      }
+    }
+    return {};
+  }
+
+  private saveStoredFilters(state: StoredFilters): void {
+    if (this.isBrowser && typeof window !== 'undefined' && window.localStorage) {
+      try {
+        localStorage.setItem(STORAGE_KEY_FILTERS, JSON.stringify(state));
+      } catch (e) {
+        console.warn('Error saving stored filters:', e);
+      }
+    }
+  }
 
   // Filtro reactivo de registros
   filteredRecords = computed(() => {
@@ -123,7 +188,7 @@ export class DashboardComponent implements OnInit {
       }
 
       return true;
-    });
+    }).sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
   });
 
   // Estadísticas y Métricas
@@ -283,10 +348,8 @@ export class DashboardComponent implements OnInit {
     if (this.notionService.hasConfiguredCredentials() && !this.usingMockData()) {
       this.notionService.updateRecord(updatedRecord).subscribe({
         next: (syncedRecord) => {
-          this.allRecords.update((records) =>
-            records.map((r) => (r.id === syncedRecord.id ? syncedRecord : r))
-          );
           this.toastService.success(`Movimiento "${updatedRecord.name}" actualizado en Notion`);
+          this.loadData();
         },
         error: (err) => {
           console.error('Error al guardar en Notion:', err);
@@ -297,6 +360,7 @@ export class DashboardComponent implements OnInit {
       });
     } else {
       this.toastService.success(`Movimiento "${updatedRecord.name}" guardado (Modo local)`);
+      this.loadData();
     }
   }
 
@@ -316,6 +380,7 @@ export class DashboardComponent implements OnInit {
       this.notionService.deleteRecord(recordId).subscribe({
         next: () => {
           this.toastService.success(`"${recordName}" eliminado de Notion`);
+          this.loadData();
         },
         error: (err) => {
           console.error('Error al eliminar en Notion:', err);
@@ -326,6 +391,7 @@ export class DashboardComponent implements OnInit {
       });
     } else {
       this.toastService.success(`"${recordName}" eliminado (Modo local)`);
+      this.loadData();
     }
   }
 

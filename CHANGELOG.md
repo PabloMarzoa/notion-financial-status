@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-10-04
+
+### Added
+- **Filter State Persistence**: Automatically persist active filters (`timeRange`, `selectedCategory`, `selectedType`, and `searchQuery`) to `localStorage` across page reloads using Angular reactive effects with SSR compatibility.
+
+### Changed
+- **Newest-to-Oldest Transaction Ordering**: Sorted the transactions table in descending chronological order so the most recent movements appear first.
+- **Reload on Edit and Delete**: Automatically trigger data reload (`loadData()`) upon updating or deleting a movement, keeping local and remote state in sync.
+
+---
+
 ## [0.1.5] - 2026-09-17
 
 ### Fixed

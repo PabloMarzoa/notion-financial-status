@@ -11,6 +11,8 @@ import {
   CategorySummary,
   Category,
   TransactionType,
+  CATEGORIES_LIST,
+  CATEGORY_COLORS,
 } from '../../models/financial-record.model';
 import { ChartsComponent } from '../charts/charts.component';
 import { ConfigModalComponent } from '../config-modal/config-modal.component';
@@ -24,27 +26,9 @@ interface StoredFilters {
   selectedCategory?: string;
   selectedType?: string;
   searchQuery?: string;
+  customStartDate?: string;
+  customEndDate?: string;
 }
-
-const CATEGORY_COLORS: Record<string, string> = {
-  Amazon: '#f59e0b',
-  Care: '#ec4899',
-  Coche: '#3b82f6',
-  Comida: '#10b981',
-  Disney: '#06b6d4',
-  Gasolina: '#f97316',
-  Netflix: '#e11d48',
-  Nómina: '#14b8a6',
-  iCloud: '#6366f1',
-  Ocio: '#8b5cf6',
-  Otros: '#64748b',
-  Piso: '#0284c7',
-  Sanitas: '#059669',
-  'Seguro coche': '#ea580c',
-  Skyshowtime: '#a855f7',
-  Teléfono: '#38bdf8',
-  Télegram: '#0ea5e9',
-};
 
 @Component({
   selector: 'app-dashboard',
@@ -72,6 +56,8 @@ export class DashboardComponent implements OnInit {
 
   allRecords = signal<FinancialRecord[]>([]);
   timeRange = signal<TimeRangeFilter>(this.storedFilters.timeRange || 'current_month');
+  customStartDate = signal<string>(this.storedFilters.customStartDate || '');
+  customEndDate = signal<string>(this.storedFilters.customEndDate || '');
   selectedCategory = signal<string>(this.storedFilters.selectedCategory || 'all');
   selectedType = signal<string>(this.storedFilters.selectedType || 'all');
   searchQuery = signal<string>(this.storedFilters.searchQuery || '');
@@ -87,6 +73,8 @@ export class DashboardComponent implements OnInit {
         selectedCategory: this.selectedCategory(),
         selectedType: this.selectedType(),
         searchQuery: this.searchQuery(),
+        customStartDate: this.customStartDate(),
+        customEndDate: this.customEndDate(),
       };
       this.saveStoredFilters(state);
     });
@@ -106,12 +94,15 @@ export class DashboardComponent implements OnInit {
             'last_12_months',
             'current_year',
             'all',
+            'custom',
           ];
           return {
             timeRange: validRanges.includes(parsed.timeRange) ? parsed.timeRange : 'current_month',
             selectedCategory: typeof parsed.selectedCategory === 'string' ? parsed.selectedCategory : 'all',
             selectedType: typeof parsed.selectedType === 'string' ? parsed.selectedType : 'all',
             searchQuery: typeof parsed.searchQuery === 'string' ? parsed.searchQuery : '',
+            customStartDate: typeof parsed.customStartDate === 'string' ? parsed.customStartDate : '',
+            customEndDate: typeof parsed.customEndDate === 'string' ? parsed.customEndDate : '',
           };
         }
       } catch (e) {
@@ -138,6 +129,8 @@ export class DashboardComponent implements OnInit {
     const cat = this.selectedCategory();
     const type = this.selectedType();
     const query = this.searchQuery().toLowerCase().trim();
+    const customStart = this.customStartDate();
+    const customEnd = this.customEndDate();
 
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -167,6 +160,18 @@ export class DashboardComponent implements OnInit {
         if (diffMonths < 0 || diffMonths >= 12) return false;
       } else if (range === 'current_year') {
         if (recYear !== currentYear) return false;
+      } else if (range === 'custom') {
+        const recTime = new Date(recDate.getFullYear(), recDate.getMonth(), recDate.getDate()).getTime();
+        if (customStart) {
+          const [sY, sM, sD] = customStart.split('-').map(Number);
+          const startTime = new Date(sY, sM - 1, sD).getTime();
+          if (recTime < startTime) return false;
+        }
+        if (customEnd) {
+          const [eY, eM, eD] = customEnd.split('-').map(Number);
+          const endTime = new Date(eY, eM - 1, eD).getTime();
+          if (recTime > endTime) return false;
+        }
       }
 
       // Filtro Categoría
@@ -276,14 +281,13 @@ export class DashboardComponent implements OnInit {
     };
   });
 
-  // Lista de categorías únicas para selector
+  // Lista de categorías para selector (unificada con CATEGORIES_LIST y cualquier categoría existente en registros)
   availableCategories = computed(() => {
-    const list = this.allRecords();
-    const set = new Set<string>();
-    for (const r of list) {
+    const set = new Set<string>(CATEGORIES_LIST);
+    for (const r of this.allRecords()) {
       if (r.categoria) set.add(r.categoria);
     }
-    return Array.from(set).sort();
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
   });
 
   ngOnInit() {
@@ -429,6 +433,42 @@ export class DashboardComponent implements OnInit {
 
   setTimeRange(range: TimeRangeFilter) {
     this.timeRange.set(range);
+  }
+
+  setCustomStartDate(date: string) {
+    if (this.customEndDate() && date && date > this.customEndDate()) {
+      this.customStartDate.set(this.customEndDate());
+    } else {
+      this.customStartDate.set(date);
+    }
+  }
+
+  setCustomEndDate(date: string) {
+    if (this.customStartDate() && date && date < this.customStartDate()) {
+      this.customEndDate.set(this.customStartDate());
+    } else {
+      this.customEndDate.set(date);
+    }
+  }
+
+  hasActiveFilters = computed(() => {
+    return (
+      this.timeRange() !== 'current_month' ||
+      this.selectedCategory() !== 'all' ||
+      this.selectedType() !== 'all' ||
+      this.searchQuery().trim() !== '' ||
+      this.customStartDate() !== '' ||
+      this.customEndDate() !== ''
+    );
+  });
+
+  clearFilters() {
+    this.timeRange.set('current_month');
+    this.selectedCategory.set('all');
+    this.selectedType.set('all');
+    this.searchQuery.set('');
+    this.customStartDate.set('');
+    this.customEndDate.set('');
   }
 
   getCategoryColor(cat: string): string {

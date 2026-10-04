@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-import { Observable, catchError, map, of, throwError } from 'rxjs';
+import { Observable, catchError, map, of, throwError, expand, reduce, EMPTY } from 'rxjs';
 import { FinancialRecord, TransactionType, Category } from '../models/financial-record.model';
 
 const NOTION_API_VERSION = '2022-06-28';
@@ -94,14 +94,23 @@ export class NotionService {
     const url = `/api/notion/databases/${dbId}/query`;
 
     return this.http.post<any>(url, {}, { headers }).pipe(
-      map((response) => {
-        this.isLoading.set(false);
-        this.isConnected.set(true);
+      expand((response: any) => {
+        if (response?.has_more && response?.next_cursor) {
+          return this.http.post<any>(url, { start_cursor: response.next_cursor }, { headers });
+        }
+        return EMPTY;
+      }),
+      reduce((acc: any[], response: any) => {
         const results = response?.results || [];
-        if (results.length > 0 && results[0].properties) {
+        if (results.length > 0 && results[0].properties && Object.keys(this.lastPropertiesSchema).length === 0) {
           this.lastPropertiesSchema = { ...results[0].properties };
         }
-        return this.parseNotionResults(results);
+        return acc.concat(results);
+      }, []),
+      map((allResults: any[]) => {
+        this.isLoading.set(false);
+        this.isConnected.set(true);
+        return this.parseNotionResults(allResults);
       }),
       catchError((err) => {
         this.isLoading.set(false);

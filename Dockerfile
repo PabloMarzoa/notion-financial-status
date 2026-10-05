@@ -1,5 +1,5 @@
 # Stage 1: Build the Angular App
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN pnpm run test:coverage
 RUN pnpm run build
 
 # Stage 2: Production Runtime
-FROM node:22-alpine AS runner
+FROM node:24-alpine AS runner
 
 WORKDIR /app
 

@@ -28,12 +28,12 @@ import { CategorySummary, FinancialStats } from '../../models/financial-record.m
               *ngFor="let cat of stats!.categoryBreakdown"
               [style.width.%]="cat.percentage"
               [style.background-color]="cat.color"
-              [title]="cat.category + ': ' + cat.percentage + '% (' + cat.total.toFixed(2) + '€) - Clic para filtrar'"
+              [title]="cat.category + ': ' + cat.percentage + '% (' + cat.total.toFixed(2) + '€) - Clic para ' + (isCategorySelected(cat.category) ? 'deseleccionar' : 'seleccionar')"
               (click)="onCategoryClick(cat.category)"
               class="h-full transition-all duration-500 hover:opacity-80 relative group cursor-pointer"
               [ngClass]="{
-                'ring-2 ring-inset ring-white dark:ring-slate-950 scale-y-110 z-10': selectedCategory.toLowerCase() === cat.category.toLowerCase(),
-                'opacity-40': selectedCategory !== 'all' && selectedCategory.toLowerCase() !== cat.category.toLowerCase()
+                'ring-2 ring-inset ring-white dark:ring-slate-950 scale-y-110 z-10': isCategorySelected(cat.category),
+                'opacity-40': hasActiveCategoryFilters() && !isCategorySelected(cat.category)
               }"
             ></div>
           </div>
@@ -45,18 +45,20 @@ import { CategorySummary, FinancialStats } from '../../models/financial-record.m
               (click)="onCategoryClick(cat.category)"
               class="flex items-center justify-between p-2 sm:p-2.5 rounded-xl border transition cursor-pointer active:scale-[0.99] group"
               [ngClass]="
-                selectedCategory.toLowerCase() === cat.category.toLowerCase()
+                isCategorySelected(cat.category)
                   ? 'bg-emerald-500/10 border-emerald-500/50 shadow-sm ring-1 ring-emerald-500/30 dark:bg-emerald-500/15'
-                  : 'bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800/80 border-slate-200 dark:border-slate-800/80'
+                  : hasActiveCategoryFilters()
+                    ? 'bg-slate-50/60 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-800/70 border-slate-200 dark:border-slate-800/60 opacity-60 hover:opacity-100'
+                    : 'bg-slate-50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800/80 border-slate-200 dark:border-slate-800/80'
               "
-              [title]="selectedCategory.toLowerCase() === cat.category.toLowerCase() ? 'Clic para quitar filtro de ' + cat.category : 'Clic para filtrar por ' + cat.category"
+              [title]="isCategorySelected(cat.category) ? 'Clic para deseleccionar ' + cat.category : 'Clic para filtrar por ' + cat.category"
             >
               <div class="flex items-center space-x-2.5 sm:space-x-3">
                 <span class="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-md shadow-sm flex-shrink-0" [style.background-color]="cat.color"></span>
                 <span
                   class="text-xs sm:text-sm font-medium truncate max-w-[120px] sm:max-w-[180px] 2xl:max-w-none transition-colors"
                   [ngClass]="
-                    selectedCategory.toLowerCase() === cat.category.toLowerCase()
+                    isCategorySelected(cat.category)
                       ? 'text-emerald-700 dark:text-emerald-300 font-semibold'
                       : 'text-slate-800 dark:text-slate-200 group-hover:text-slate-950 dark:group-hover:text-white'
                   "
@@ -65,7 +67,7 @@ import { CategorySummary, FinancialStats } from '../../models/financial-record.m
                 </span>
                 <span class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">({{ cat.count }} movs)</span>
                 <span
-                  *ngIf="selectedCategory.toLowerCase() === cat.category.toLowerCase()"
+                  *ngIf="isCategorySelected(cat.category)"
                   class="px-1.5 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded border border-emerald-500/30 uppercase tracking-wider"
                 >
                   Filtro activo
@@ -178,8 +180,25 @@ import { CategorySummary, FinancialStats } from '../../models/financial-record.m
 })
 export class ChartsComponent {
   @Input() stats: FinancialStats | null = null;
-  @Input() selectedCategory = 'all';
+  @Input() selectedCategory: string | string[] = [];
   @Output() categorySelect = new EventEmitter<string>();
+
+  isCategorySelected(cat: string): boolean {
+    if (!this.selectedCategory) return false;
+    if (Array.isArray(this.selectedCategory)) {
+      return this.selectedCategory.some((c) => c.toLowerCase() === cat.toLowerCase());
+    }
+    if (this.selectedCategory === 'all') return false;
+    return this.selectedCategory.toLowerCase() === cat.toLowerCase();
+  }
+
+  hasActiveCategoryFilters(): boolean {
+    if (!this.selectedCategory) return false;
+    if (Array.isArray(this.selectedCategory)) {
+      return this.selectedCategory.length > 0;
+    }
+    return this.selectedCategory !== 'all';
+  }
 
   onCategoryClick(category: string): void {
     this.categorySelect.emit(category);

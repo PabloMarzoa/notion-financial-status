@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-05
+
+### Added
+- **CSV Data & Balances Export**: Added full view export to CSV format with UTF-8 BOM encoding for Excel compatibility. Includes a top summary section with current filter balances (Total Ingresos, Total Gastos, Gasto Recurrente, Gasto Único, Balance Neto, Tasa de Ahorro, and record count) followed by the complete list of filtered transactions (`Fecha,Concepto,Categoría,Tipo,Importe (€)`).
+- **Dedicated Actions Toolbar Card**: Relocated main action buttons (`Nuevo Movimiento`, `Exportar CSV`, `Refrescar`, `Configurar`) to a dedicated toolbar card with the same visual style as the filters bar and placed immediately above it.
+
+---
+
+## [0.3.1] - 2026-10-05
+
+### Changed
+- **Node.js LTS Upgrade**: Updated runtime and CI environments to Node.js 24 (`v24.21.0`), adding [.nvmrc](file:///Users/pmarzoa/dev/finanzas/.nvmrc) and updating [Dockerfile](file:///Users/pmarzoa/dev/finanzas/Dockerfile) (`node:24-alpine`) and [feature-ci.yml](file:///Users/pmarzoa/dev/finanzas/.github/workflows/feature-ci.yml).
+- **Dependencies Upgrade**: Upgraded all project dependencies to latest versions, including Angular packages to `22.2.1`, Vitest to `5.0.3`, Tailwind CSS to `4.3.3`, PostCSS to `8.5.28`, Prettier to `3.9.9`, and pinned TypeScript to `~6.0.3` for Angular compiler compatibility.
+
+---
+
 ## [0.3.0] - 2026-10-04
 
 ### Added

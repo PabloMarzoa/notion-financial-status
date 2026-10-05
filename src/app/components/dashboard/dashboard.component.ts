@@ -474,4 +474,61 @@ export class DashboardComponent implements OnInit {
   getCategoryColor(cat: string): string {
     return CATEGORY_COLORS[cat] || '#94a3b8';
   }
+
+  exportCsv(): void {
+    const list = this.filteredRecords();
+    const currentStats = this.stats();
+
+    const escapeCsv = (val: string | number | null | undefined): string => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const lines: string[] = [];
+
+    // Apartado 1: Balances y métricas
+    lines.push('RESUMEN DE BALANCES');
+    lines.push('Métrica,Valor (€ / %)');
+    lines.push(`${escapeCsv('Total Ingresos')},${escapeCsv(currentStats.totalIngresos.toFixed(2))}`);
+    lines.push(`${escapeCsv('Total Gastos')},${escapeCsv(currentStats.totalGastos.toFixed(2))}`);
+    lines.push(`${escapeCsv('Gasto Recurrente')},${escapeCsv(currentStats.totalGastoRecurrente.toFixed(2))}`);
+    lines.push(`${escapeCsv('Gasto Único')},${escapeCsv(currentStats.totalGastoUnico.toFixed(2))}`);
+    lines.push(`${escapeCsv('Balance Neto')},${escapeCsv(currentStats.balanceNeto.toFixed(2))}`);
+    lines.push(`${escapeCsv('Tasa de Ahorro (%)')},${escapeCsv(currentStats.tasaAhorro.toFixed(2))}`);
+    lines.push(`${escapeCsv('Total Movimientos')},${escapeCsv(currentStats.recordCount)}`);
+    lines.push(''); // Separador
+
+    // Apartado 2: Tabla de Movimientos
+    lines.push('REGISTRO DE MOVIMIENTOS');
+    lines.push('Fecha,Concepto,Categoría,Tipo,Importe (€)');
+    for (const record of list) {
+      lines.push(
+        [
+          escapeCsv(record.fechaString),
+          escapeCsv(record.name),
+          escapeCsv(record.categoria),
+          escapeCsv(record.tipo),
+          escapeCsv(record.cantidad.toFixed(2)),
+        ].join(',')
+      );
+    }
+
+    const csvContent = '\uFEFF' + lines.join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+
+    if (this.isBrowser && typeof window !== 'undefined' && typeof document !== 'undefined') {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0];
+      link.setAttribute('href', url);
+      link.setAttribute('download', `finanzas_export_${dateStr}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      this.toastService.success('Archivo CSV exportado con éxito');
+    }
+  }
 }

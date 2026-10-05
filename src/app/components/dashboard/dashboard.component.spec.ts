@@ -453,4 +453,67 @@ describe('DashboardComponent', () => {
     expect(stored.selectedType).toBe('Ingreso');
     expect(stored.searchQuery).toBe('Repsol');
   });
+
+  it('should export current view balances and records to CSV format', () => {
+    const today = new Date();
+    component.allRecords.set([
+      {
+        id: 'rec-1',
+        name: 'Sueldo Octubre',
+        cantidad: 2500,
+        categoria: 'Nómina',
+        fecha: today,
+        fechaString: '2026-10-01',
+        tipo: 'Ingreso',
+      },
+      {
+        id: 'rec-2',
+        name: 'Alquiler',
+        cantidad: 800,
+        categoria: 'Piso',
+        fecha: today,
+        fechaString: '2026-10-02',
+        tipo: 'Gasto recurrente',
+      },
+    ]);
+
+    fixture.detectChanges();
+
+    let createdBlob: Blob | null = null;
+    let appendedLink: any = null;
+    let clicked = false;
+
+    const originalCreateElement = document.createElement.bind(document);
+    const originalCreateObjectURL = window.URL.createObjectURL;
+    const originalRevokeObjectURL = window.URL.revokeObjectURL;
+
+    window.URL.createObjectURL = vi.fn((blob: Blob) => {
+      createdBlob = blob;
+      return 'blob:http://localhost/fake-url';
+    });
+    window.URL.revokeObjectURL = vi.fn();
+
+    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+      const el = originalCreateElement(tagName);
+      if (tagName.toLowerCase() === 'a') {
+        el.click = () => {
+          clicked = true;
+        };
+        appendedLink = el;
+      }
+      return el;
+    });
+
+    component.exportCsv();
+
+    expect(clicked).toBe(true);
+    expect(window.URL.createObjectURL).toHaveBeenCalled();
+    expect(window.URL.revokeObjectURL).toHaveBeenCalled();
+    expect(appendedLink.getAttribute('download')).toMatch(/^finanzas_export_\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(createdBlob).toBeTruthy();
+
+    window.URL.createObjectURL = originalCreateObjectURL;
+    window.URL.revokeObjectURL = originalRevokeObjectURL;
+    vi.restoreAllMocks();
+  });
 });

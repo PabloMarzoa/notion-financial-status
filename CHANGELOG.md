@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-10-05
+
+### Added
+- **Amount Interval Filter**:
+  - Added an interactive amount interval filter dropdown button in the filters toolbar displaying dynamic summaries (`"Cualquier importe"`, `"50€ - 200€"`, `"≥ 100€"`, `"≤ 50€"`).
+  - Popover modal featuring custom minimum and maximum amount inputs in euros with instant numeric validation.
+  - Four quick preset shortcuts for one-click filtering: *Hasta 50 €*, *50 € - 200 €*, *200 € - 500 €*, and *Más de 500 €*.
+  - Full persistence of `minAmount` and `maxAmount` in `localStorage` across page reloads.
+  - Integration with general `hasActiveFilters()` and `clearFilters()` actions, and outside-click automatic popover dismissal.
+  - Transaction list, financial summary cards, and CSV exports reactively reflect records matching the selected amount interval.
+
+---
+
+## [0.5.3] - 2026-10-05
+
+### Fixed
+- **Monthly Evolution Bar Label Spacing**: Increased label width reservation (`w-14 sm:w-16`) and expanded gap spacing (`space-x-2.5 sm:space-x-3`) in the monthly evolution breakdown bars in [ChartsComponent](file:///Users/pmarzoa/dev/finanzas/src/app/components/charts/charts.component.ts), preventing text labels like "Ingresos:" from touching the progress bar across all screen widths.
+
+---
+
+## [0.5.2] - 2026-10-05
+
+### Fixed
+- **Theme Toggle Layout Shift & Initial Icon Flash**:
+  - Replaced legacy dual `*ngIf` conditions with `@if / @else` block ensuring strictly one icon is rendered at any point in time.
+  - Assigned fixed dimensions (`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center flex-shrink-0`) to the theme toggle button so its size remains invariable during SSR hydration, rendering, and theme changes.
+  - Added synchronous inline theme preference resolution in `<head>` of [index.html](file:///Users/pmarzoa/dev/finanzas/src/index.html) to prevent layout and style shift during initial HTML paint.
+
+---
+
 ## [0.5.1] - 2026-10-05
 
 ### Fixed

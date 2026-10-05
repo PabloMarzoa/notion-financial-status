@@ -200,6 +200,8 @@ describe('DashboardComponent', () => {
     expect(component.searchQuery()).toBe('');
     expect(component.customStartDate()).toBe('');
     expect(component.customEndDate()).toBe('');
+    expect(component.minAmount()).toBeNull();
+    expect(component.maxAmount()).toBeNull();
     expect(component.hasActiveFilters()).toBe(false);
   });
 
@@ -549,5 +551,106 @@ describe('DashboardComponent', () => {
     window.URL.createObjectURL = originalCreateObjectURL;
     window.URL.revokeObjectURL = originalRevokeObjectURL;
     vi.restoreAllMocks();
+  });
+
+  it('should render a single theme toggle icon with fixed dimensions', () => {
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelector('button[title*="Cambiar a tema"]');
+    expect(button).toBeTruthy();
+    expect(button.classList.contains('w-9')).toBe(true);
+    expect(button.classList.contains('h-9')).toBe(true);
+
+    const svgIcons = button.querySelectorAll('svg');
+    expect(svgIcons.length).toBe(1);
+
+    component.themeService.toggleTheme();
+    fixture.detectChanges();
+
+    const updatedIcons = button.querySelectorAll('svg');
+    expect(updatedIcons.length).toBe(1);
+  });
+
+  it('should filter records by amount interval, toggle dropdown, and support presets', () => {
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth();
+
+    component.allRecords.set([
+      {
+        id: '1',
+        name: 'Café',
+        cantidad: 2.5,
+        categoria: 'Comida',
+        tipo: 'Gasto único',
+        fecha: new Date(currentYear, currentMonth, 1),
+        fechaString: `1/${currentMonth + 1}/${currentYear}`,
+      },
+      {
+        id: '2',
+        name: 'Supermercado',
+        cantidad: 85,
+        categoria: 'Comida',
+        tipo: 'Gasto único',
+        fecha: new Date(currentYear, currentMonth, 2),
+        fechaString: `2/${currentMonth + 1}/${currentYear}`,
+      },
+      {
+        id: '3',
+        name: 'Alquiler',
+        cantidad: 750,
+        categoria: 'Piso',
+        tipo: 'Gasto recurrente',
+        fecha: new Date(currentYear, currentMonth, 3),
+        fechaString: `3/${currentMonth + 1}/${currentYear}`,
+      },
+    ]);
+
+    expect(component.filteredRecords().length).toBe(3);
+    expect(component.hasAmountFilter()).toBe(false);
+    expect(component.amountFilterLabel()).toBe('Cualquier importe');
+
+    // Preset: 50 € - 200 €
+    component.setAmountPreset(50, 200);
+    expect(component.hasAmountFilter()).toBe(true);
+    expect(component.amountFilterLabel()).toBe('50€ - 200€');
+    expect(component.filteredRecords().length).toBe(1);
+    expect(component.filteredRecords()[0].name).toBe('Supermercado');
+
+    // Only Min: >= 100 €
+    component.setMinAmount(100);
+    component.setMaxAmount(null);
+    expect(component.amountFilterLabel()).toBe('≥ 100€');
+    expect(component.filteredRecords().length).toBe(1);
+    expect(component.filteredRecords()[0].name).toBe('Alquiler');
+
+    // Only Max: <= 50 €
+    component.setMinAmount(null);
+    component.setMaxAmount(50);
+    expect(component.amountFilterLabel()).toBe('≤ 50€');
+    expect(component.filteredRecords().length).toBe(1);
+    expect(component.filteredRecords()[0].name).toBe('Café');
+
+    // Presets with string inputs or invalid values
+    component.setMinAmount('10');
+    expect(component.minAmount()).toBe(10);
+    component.setMinAmount('');
+    expect(component.minAmount()).toBeNull();
+    component.setMaxAmount('300');
+    expect(component.maxAmount()).toBe(300);
+    component.setMaxAmount('');
+    expect(component.maxAmount()).toBeNull();
+
+    // Clear amount filter
+    component.setAmountPreset(20, 100);
+    expect(component.hasActiveFilters()).toBe(true);
+    component.clearAmountFilter();
+    expect(component.hasAmountFilter()).toBe(false);
+    expect(component.filteredRecords().length).toBe(3);
+
+    // Dropdown toggle and click outside
+    component.showAmountDropdown.set(true);
+    expect(component.showAmountDropdown()).toBe(true);
+    component.onDocumentClick(new MouseEvent('click'));
+    expect(component.showAmountDropdown()).toBe(false);
   });
 });

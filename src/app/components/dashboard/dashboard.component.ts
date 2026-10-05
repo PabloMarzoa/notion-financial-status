@@ -29,6 +29,8 @@ interface StoredFilters {
   searchQuery?: string;
   customStartDate?: string;
   customEndDate?: string;
+  minAmount?: number | null;
+  maxAmount?: number | null;
 }
 
 @Component({
@@ -63,9 +65,12 @@ export class DashboardComponent implements OnInit {
   selectedCategories = signal<string[]>(this.storedFilters.selectedCategories || []);
   selectedType = signal<string>(this.storedFilters.selectedType || 'all');
   searchQuery = signal<string>(this.storedFilters.searchQuery || '');
+  minAmount = signal<number | null>(this.storedFilters.minAmount ?? null);
+  maxAmount = signal<number | null>(this.storedFilters.maxAmount ?? null);
   showConfigModal = signal<boolean>(false);
   showCreateModal = signal<boolean>(false);
   showCategoryDropdown = signal<boolean>(false);
+  showAmountDropdown = signal<boolean>(false);
   selectedRecordForEdit = signal<FinancialRecord | null>(null);
   usingMockData = signal<boolean>(!this.notionService.hasConfiguredCredentials());
 
@@ -78,6 +83,8 @@ export class DashboardComponent implements OnInit {
         searchQuery: this.searchQuery(),
         customStartDate: this.customStartDate(),
         customEndDate: this.customEndDate(),
+        minAmount: this.minAmount(),
+        maxAmount: this.maxAmount(),
       };
       this.saveStoredFilters(state);
     });
@@ -107,6 +114,9 @@ export class DashboardComponent implements OnInit {
             categories = [parsed.selectedCategory];
           }
 
+          const parsedMin = typeof parsed.minAmount === 'number' && !isNaN(parsed.minAmount) ? parsed.minAmount : null;
+          const parsedMax = typeof parsed.maxAmount === 'number' && !isNaN(parsed.maxAmount) ? parsed.maxAmount : null;
+
           return {
             timeRange: validRanges.includes(parsed.timeRange) ? parsed.timeRange : 'current_month',
             selectedCategories: categories,
@@ -114,6 +124,8 @@ export class DashboardComponent implements OnInit {
             searchQuery: typeof parsed.searchQuery === 'string' ? parsed.searchQuery : '',
             customStartDate: typeof parsed.customStartDate === 'string' ? parsed.customStartDate : '',
             customEndDate: typeof parsed.customEndDate === 'string' ? parsed.customEndDate : '',
+            minAmount: parsedMin,
+            maxAmount: parsedMax,
           };
         }
       } catch (e) {
@@ -195,6 +207,17 @@ export class DashboardComponent implements OnInit {
         const matchCat = rec.categoria.toLowerCase().includes(query);
         const matchDate = rec.fechaString.toLowerCase().includes(query);
         if (!matchName && !matchCat && !matchDate) return false;
+      }
+
+      // Filtro de Importe (monto absoluto)
+      const min = this.minAmount();
+      const max = this.maxAmount();
+      const absAmount = Math.abs(rec.cantidad);
+      if (min !== null && !isNaN(min) && absAmount < min) {
+        return false;
+      }
+      if (max !== null && !isNaN(max) && absAmount > max) {
+        return false;
       }
 
       return true;
@@ -382,14 +405,70 @@ export class DashboardComponent implements OnInit {
     this.selectedCategories.set([]);
   }
 
+  setMinAmount(value: number | string | null) {
+    if (value === '' || value === null || value === undefined) {
+      this.minAmount.set(null);
+    } else {
+      const num = Number(value);
+      this.minAmount.set(!isNaN(num) && num >= 0 ? num : null);
+    }
+  }
+
+  setMaxAmount(value: number | string | null) {
+    if (value === '' || value === null || value === undefined) {
+      this.maxAmount.set(null);
+    } else {
+      const num = Number(value);
+      this.maxAmount.set(!isNaN(num) && num >= 0 ? num : null);
+    }
+  }
+
+  setAmountPreset(min: number | null, max: number | null) {
+    this.minAmount.set(min);
+    this.maxAmount.set(max);
+  }
+
+  clearAmountFilter() {
+    this.minAmount.set(null);
+    this.maxAmount.set(null);
+  }
+
+  hasAmountFilter = computed(() => {
+    return this.minAmount() !== null || this.maxAmount() !== null;
+  });
+
+  amountFilterLabel = computed(() => {
+    const min = this.minAmount();
+    const max = this.maxAmount();
+    if (min !== null && max !== null) {
+      return `${min}€ - ${max}€`;
+    }
+    if (min !== null) {
+      return `≥ ${min}€`;
+    }
+    if (max !== null) {
+      return `≤ ${max}€`;
+    }
+    return 'Cualquier importe';
+  });
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
+    const target = event.target as Node;
     if (this.showCategoryDropdown()) {
-      const clickedInside = this.elementRef.nativeElement
+      const clickedCategory = this.elementRef.nativeElement
         .querySelector('#category-dropdown-container')
-        ?.contains(event.target as Node);
-      if (!clickedInside) {
+        ?.contains(target);
+      if (!clickedCategory) {
         this.showCategoryDropdown.set(false);
+      }
+    }
+    if (this.showAmountDropdown()) {
+      const clickedAmount = this.elementRef.nativeElement
+        .querySelector('#amount-dropdown-container')
+        ?.contains(target);
+      if (!clickedAmount) {
+        this.showAmountDropdown.set(false);
       }
     }
   }
@@ -517,7 +596,9 @@ export class DashboardComponent implements OnInit {
       this.selectedType() !== 'all' ||
       this.searchQuery().trim() !== '' ||
       this.customStartDate() !== '' ||
-      this.customEndDate() !== ''
+      this.customEndDate() !== '' ||
+      this.minAmount() !== null ||
+      this.maxAmount() !== null
     );
   });
 
@@ -528,6 +609,8 @@ export class DashboardComponent implements OnInit {
     this.searchQuery.set('');
     this.customStartDate.set('');
     this.customEndDate.set('');
+    this.minAmount.set(null);
+    this.maxAmount.set(null);
   }
 
   getCategoryColor(cat: string): string {

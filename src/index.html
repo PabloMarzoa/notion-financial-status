@@ -47,6 +47,15 @@
       if (localStorage.getItem('finanzas_notion_api_token') && localStorage.getItem('finanzas_notion_db_id')) {
         document.documentElement.classList.add('has-notion-credentials');
       }
+      var storedTheme = localStorage.getItem('finanzas_theme_preference');
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+      } else {
+        document.documentElement.classList.add('light');
+        document.documentElement.classList.remove('dark');
+      }
     } catch (e) {}
   </script>
   <style>

@@ -125,8 +125,8 @@ import { CategorySummary, FinancialStats } from '../../models/financial-record.m
 
               <!-- Bar visual -->
               <div class="space-y-1.5 text-xs">
-                <div class="flex items-center space-x-2">
-                  <span class="w-12 sm:w-14 text-slate-500 dark:text-slate-400 text-[10px] sm:text-[11px] flex-shrink-0">Ingresos:</span>
+                <div class="flex items-center space-x-2.5 sm:space-x-3">
+                  <span class="w-14 sm:w-16 text-slate-500 dark:text-slate-400 text-[10px] sm:text-[11px] flex-shrink-0">Ingresos:</span>
                   <div class="flex-1 bg-slate-200 dark:bg-slate-800 h-2 sm:h-2.5 rounded-full overflow-hidden">
                     <div
                       class="bg-emerald-500 dark:bg-emerald-400 h-full rounded-full transition-all duration-500"
@@ -138,8 +138,8 @@ import { CategorySummary, FinancialStats } from '../../models/financial-record.m
                   </span>
                 </div>
 
-                <div class="flex items-center space-x-2">
-                  <span class="w-12 sm:w-14 text-slate-500 dark:text-slate-400 text-[10px] sm:text-[11px] flex-shrink-0">Gastos:</span>
+                <div class="flex items-center space-x-2.5 sm:space-x-3">
+                  <span class="w-14 sm:w-16 text-slate-500 dark:text-slate-400 text-[10px] sm:text-[11px] flex-shrink-0">Gastos:</span>
                   <div class="flex-1 bg-slate-200 dark:bg-slate-800 h-2 sm:h-2.5 rounded-full overflow-hidden">
                     <div
                       class="bg-rose-500 dark:bg-rose-400 h-full rounded-full transition-all duration-500"

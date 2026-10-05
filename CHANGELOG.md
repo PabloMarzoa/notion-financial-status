@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-10-05
+
+### Fixed
+- **Category Filter Dropdown Layering & Stacking Context**: Added relative stacking position and `z-30` to the filters bar container and enhanced popover menu animation (`animate-slide-up`), ensuring the dropdown appears on top of KPI summary cards and chart content.
+- **Select Chevron Spacing**: Restyled time range and transaction type dropdowns with consistent `appearance-none`, custom SVG chevrons, and balanced right padding (`pr-8`), matching the spacing and look of the category dropdown.
+- **Dropdown Outside-Click Dismissal**: Added `@HostListener('document:click')` to automatically dismiss the category filter menu when clicking outside of it.
+
+---
+
 ## [0.5.0] - 2026-10-05
 
 ### Added

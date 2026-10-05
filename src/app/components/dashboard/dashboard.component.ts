@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, effect, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect, PLATFORM_ID, ElementRef, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotionService } from '../../services/notion.service';
@@ -48,6 +48,7 @@ interface StoredFilters {
 export class DashboardComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private isBrowser = isPlatformBrowser(this.platformId);
+  private elementRef = inject(ElementRef);
 
   notionService = inject(NotionService);
   themeService = inject(ThemeService);
@@ -379,6 +380,18 @@ export class DashboardComponent implements OnInit {
 
   clearSelectedCategories() {
     this.selectedCategories.set([]);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (this.showCategoryDropdown()) {
+      const clickedInside = this.elementRef.nativeElement
+        .querySelector('#category-dropdown-container')
+        ?.contains(event.target as Node);
+      if (!clickedInside) {
+        this.showCategoryDropdown.set(false);
+      }
+    }
   }
 
   selectRecordForEdit(record: FinancialRecord) {

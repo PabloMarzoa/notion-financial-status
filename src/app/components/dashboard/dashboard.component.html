@@ -182,24 +182,31 @@
     </div>
 
     <!-- Filters Bar (All aligned to left) -->
-    <div class="bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 sm:p-3.5 shadow-xl backdrop-blur-md">
+    <div class="relative z-30 bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 sm:p-3.5 shadow-xl backdrop-blur-md">
       <div class="flex flex-wrap items-center gap-2.5 sm:gap-3 justify-start">
         
         <!-- Time Range Dropdown -->
-        <select
-          [ngModel]="timeRange()"
-          (ngModelChange)="setTimeRange($event)"
-          class="h-9 w-full sm:w-auto px-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
-        >
-          <option value="current_month">Este mes</option>
-          <option value="last_month">Mes pasado</option>
-          <option value="last_3_months">Últimos 3 meses</option>
-          <option value="last_6_months">Últimos 6 meses</option>
-          <option value="last_12_months">Últimos 12 meses</option>
-          <option value="current_year">Año actual</option>
-          <option value="all">Todo el histórico</option>
-          <option value="custom">Período personalizado</option>
-        </select>
+        <div class="relative w-full sm:w-auto">
+          <select
+            [ngModel]="timeRange()"
+            (ngModelChange)="setTimeRange($event)"
+            class="h-9 w-full sm:w-auto pl-3 pr-8 appearance-none bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
+          >
+            <option value="current_month">Este mes</option>
+            <option value="last_month">Mes pasado</option>
+            <option value="last_3_months">Últimos 3 meses</option>
+            <option value="last_6_months">Últimos 6 meses</option>
+            <option value="last_12_months">Últimos 12 meses</option>
+            <option value="current_year">Año actual</option>
+            <option value="all">Todo el histórico</option>
+            <option value="custom">Período personalizado</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-500">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
 
         <!-- Custom Date Range Inputs -->
         <ng-container *ngIf="timeRange() === 'custom'">
@@ -230,16 +237,16 @@
         </ng-container>
 
         <!-- Category Multi-Select Filter -->
-        <div class="relative w-full sm:w-auto">
+        <div id="category-dropdown-container" class="relative w-full sm:w-auto">
           <button
             type="button"
             (click)="showCategoryDropdown.set(!showCategoryDropdown())"
-            class="h-9 w-full sm:w-auto px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 flex items-center justify-between gap-2 cursor-pointer transition select-none"
+            class="h-9 w-full sm:w-auto px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 flex items-center justify-between gap-2.5 cursor-pointer transition select-none"
             [ngClass]="{ 'border-emerald-500/60 ring-1 ring-emerald-500/30': selectedCategories().length > 0 }"
             title="Filtrar por una o varias categorías"
           >
             <div class="flex items-center space-x-1.5 truncate">
-              <span class="w-2 h-2 rounded-full" [ngClass]="selectedCategories().length > 0 ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+              <span class="w-2 h-2 rounded-full flex-shrink-0" [ngClass]="selectedCategories().length > 0 ? 'bg-emerald-500' : 'bg-slate-400'"></span>
               <span *ngIf="selectedCategories().length === 0" class="truncate">Todas las categorías</span>
               <span *ngIf="selectedCategories().length === 1" class="font-medium truncate text-emerald-600 dark:text-emerald-400">
                 {{ selectedCategories()[0] }}
@@ -262,7 +269,7 @@
           <!-- Dropdown Popover Menu -->
           <div
             *ngIf="showCategoryDropdown()"
-            class="absolute left-0 mt-1.5 w-64 max-h-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl p-2 z-50 flex flex-col space-y-1 backdrop-blur-lg"
+            class="absolute left-0 mt-1.5 w-64 max-h-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl p-2 z-50 flex flex-col space-y-1 backdrop-blur-lg animate-slide-up"
           >
             <!-- Header with actions -->
             <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
@@ -313,16 +320,23 @@
         </div>
 
         <!-- Type filter -->
-        <select
-          [ngModel]="selectedType()"
-          (ngModelChange)="selectedType.set($event)"
-          class="h-9 w-full sm:w-auto px-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
-        >
-          <option value="all">Todos los tipos</option>
-          <option value="Ingreso">Ingreso</option>
-          <option value="Gasto recurrente">Gasto recurrente</option>
-          <option value="Gasto único">Gasto único</option>
-        </select>
+        <div class="relative w-full sm:w-auto">
+          <select
+            [ngModel]="selectedType()"
+            (ngModelChange)="selectedType.set($event)"
+            class="h-9 w-full sm:w-auto pl-3 pr-8 appearance-none bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
+          >
+            <option value="all">Todos los tipos</option>
+            <option value="Ingreso">Ingreso</option>
+            <option value="Gasto recurrente">Gasto recurrente</option>
+            <option value="Gasto único">Gasto único</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-500">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
 
         <!-- Search input -->
         <div class="relative w-full sm:w-auto 2xl:w-60">

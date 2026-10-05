@@ -368,6 +368,18 @@ describe('DashboardComponent', () => {
     expect(component.selectedCategories()).toEqual([]);
   });
 
+  it('should close category dropdown on outside click', () => {
+    component.showCategoryDropdown.set(true);
+    expect(component.showCategoryDropdown()).toBe(true);
+
+    // Click outside
+    const outsideEvent = new MouseEvent('click');
+    Object.defineProperty(outsideEvent, 'target', { value: document.body });
+    component.onDocumentClick(outsideEvent);
+
+    expect(component.showCategoryDropdown()).toBe(false);
+  });
+
   it('should restore filters from localStorage on initialization if present (including legacy string selectedCategory)', () => {
     const savedState = {
       timeRange: 'last_3_months',

@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-10-05
+
+### Fixed
+- **Category Filter Dropdown Layering & Stacking Context**: Added relative stacking position and `z-30` to the filters bar container and enhanced popover menu animation (`animate-slide-up`), ensuring the dropdown appears on top of KPI summary cards and chart content.
+- **Select Chevron Spacing**: Restyled time range and transaction type dropdowns with consistent `appearance-none`, custom SVG chevrons, and balanced right padding (`pr-8`), matching the spacing and look of the category dropdown.
+- **Dropdown Outside-Click Dismissal**: Added `@HostListener('document:click')` to automatically dismiss the category filter menu when clicking outside of it.
+
+---
+
+## [0.5.0] - 2026-10-05
+
+### Added
+- **Multi-Category Selection Filter**:
+  - The filter toolbar now features an interactive multi-select dropdown button indicating the active selection ("Todas las categorías", single category name, or count of selected categories) with toggle options and a clear action.
+  - Clicking any category selects or deselects it in the multi-select array.
+  - The category breakdown card in [ChartsComponent](file:///Users/pmarzoa/dev/finanzas/src/app/components/charts/charts.component.ts) now preserves all categories for the selected period rather than hiding non-matching items; non-selected categories are softly dimmed while filtered categories are highlighted with borders and badges.
+  - Clicking categories in the chart progress bar or category rows toggles their selection state seamlessly.
+  - Transactions table, financial summaries, and CSV exports reflect records matching any of the chosen categories.
+
+---
+
+## [0.4.0] - 2026-10-05
+
+### Added
+- **CSV Data & Balances Export**: Added full view export to CSV format with UTF-8 BOM encoding for Excel compatibility. Includes a top summary section with current filter balances (Total Ingresos, Total Gastos, Gasto Recurrente, Gasto Único, Balance Neto, Tasa de Ahorro, and record count) followed by the complete list of filtered transactions (`Fecha,Concepto,Categoría,Tipo,Importe (€)`).
+- **Dedicated Actions Toolbar Card**: Relocated main action buttons (`Nuevo Movimiento`, `Exportar CSV`, `Refrescar`, `Configurar`) to a dedicated toolbar card with the same visual style as the filters bar and placed immediately above it.
+
+---
+
+## [0.3.1] - 2026-10-05
+
+### Changed
+- **Node.js LTS Upgrade**: Updated runtime and CI environments to Node.js 24 (`v24.21.0`), adding [.nvmrc](file:///Users/pmarzoa/dev/finanzas/.nvmrc) and updating [Dockerfile](file:///Users/pmarzoa/dev/finanzas/Dockerfile) (`node:24-alpine`) and [feature-ci.yml](file:///Users/pmarzoa/dev/finanzas/.github/workflows/feature-ci.yml).
+- **Dependencies Upgrade**: Upgraded all project dependencies to latest versions, including Angular packages to `22.2.1`, Vitest to `5.0.3`, Tailwind CSS to `4.3.3`, PostCSS to `8.5.28`, Prettier to `3.9.9`, and pinned TypeScript to `~6.0.3` for Angular compiler compatibility.
+
+---
+
 ## [0.3.0] - 2026-10-04
 
 ### Added

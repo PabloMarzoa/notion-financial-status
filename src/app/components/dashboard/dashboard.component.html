@@ -49,47 +49,6 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
           </svg>
         </button>
-
-        <!-- Reload Button -->
-        <button
-          (click)="loadData(true)"
-          [disabled]="notionService.isLoading()"
-          class="p-2 sm:p-2.5 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 rounded-xl text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white transition disabled:opacity-50 shadow-sm cursor-pointer"
-          title="Recargar datos"
-        >
-          <svg
-            class="w-4 h-4"
-            [ngClass]="{ 'animate-spin': notionService.isLoading() }"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        </button>
-
-        <!-- New Transaction Button -->
-        <button
-          (click)="showCreateModal.set(true)"
-          class="flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 font-bold rounded-xl text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition active:scale-95 cursor-pointer whitespace-nowrap"
-        >
-          <svg class="w-4 h-4 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Nuevo Movimiento</span>
-        </button>
-
-        <!-- Notion Config Button -->
-        <button
-          (click)="showConfigModal.set(true)"
-          class="flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-300 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white font-semibold rounded-xl text-xs sm:text-sm shadow-sm transition active:scale-95 cursor-pointer whitespace-nowrap"
-        >
-          <svg class="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          <span>Configurar</span>
-        </button>
       </div>
     </header>
 
@@ -159,30 +118,100 @@
       </button>
     </div>
 
+    <!-- Actions Bar (Export, Config, Refresh, New Transaction) -->
+    <div class="bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 sm:p-3.5 shadow-xl backdrop-blur-md">
+      <div class="flex flex-wrap items-center gap-2.5 sm:gap-3 justify-start">
+        
+        <!-- New Transaction Button -->
+        <button
+          (click)="showCreateModal.set(true)"
+          class="h-9 flex items-center space-x-1.5 px-3.5 sm:px-4 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 font-bold rounded-xl text-xs shadow-sm shadow-emerald-500/20 transition active:scale-95 cursor-pointer whitespace-nowrap"
+        >
+          <svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Nuevo Movimiento</span>
+        </button>
+
+        <!-- Export CSV Button -->
+        <button
+          (click)="exportCsv()"
+          [disabled]="filteredRecords().length === 0"
+          class="h-9 flex items-center space-x-1.5 px-3 sm:px-3.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white font-medium text-xs shadow-sm transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer whitespace-nowrap"
+          title="Exportar a CSV con balances actuales y lista de movimientos"
+        >
+          <svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span>Exportar CSV</span>
+        </button>
+
+        <!-- Reload / Refresh Button -->
+        <button
+          (click)="loadData(true)"
+          [disabled]="notionService.isLoading()"
+          class="h-9 flex items-center space-x-1.5 px-3 sm:px-3.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white font-medium text-xs shadow-sm transition active:scale-95 disabled:opacity-40 cursor-pointer whitespace-nowrap"
+          title="Recargar datos desde Notion"
+        >
+          <svg
+            class="w-3.5 h-3.5 text-slate-600 dark:text-slate-300"
+            [ngClass]="{ 'animate-spin': notionService.isLoading() }"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>Refrescar</span>
+        </button>
+
+        <!-- Notion Config Button -->
+        <button
+          (click)="showConfigModal.set(true)"
+          class="h-9 flex items-center space-x-1.5 px-3 sm:px-3.5 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-slate-800 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white font-medium text-xs shadow-sm transition active:scale-95 cursor-pointer whitespace-nowrap"
+          title="Configurar credenciales de Notion"
+        >
+          <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Configurar</span>
+        </button>
+
+      </div>
+    </div>
+
     <!-- Filters Bar (All aligned to left) -->
-    <div class="bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3.5 sm:p-4 shadow-xl backdrop-blur-md">
+    <div class="relative z-30 bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-3 sm:p-3.5 shadow-xl backdrop-blur-md">
       <div class="flex flex-wrap items-center gap-2.5 sm:gap-3 justify-start">
         
         <!-- Time Range Dropdown -->
-        <select
-          [ngModel]="timeRange()"
-          (ngModelChange)="setTimeRange($event)"
-          class="w-full sm:w-auto px-3 py-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
-        >
-          <option value="current_month">Este mes</option>
-          <option value="last_month">Mes pasado</option>
-          <option value="last_3_months">Últimos 3 meses</option>
-          <option value="last_6_months">Últimos 6 meses</option>
-          <option value="last_12_months">Últimos 12 meses</option>
-          <option value="current_year">Año actual</option>
-          <option value="all">Todo el histórico</option>
-          <option value="custom">Período personalizado</option>
-        </select>
+        <div class="relative w-full sm:w-auto">
+          <select
+            [ngModel]="timeRange()"
+            (ngModelChange)="setTimeRange($event)"
+            class="h-9 w-full sm:w-auto pl-3 pr-8 appearance-none bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
+          >
+            <option value="current_month">Este mes</option>
+            <option value="last_month">Mes pasado</option>
+            <option value="last_3_months">Últimos 3 meses</option>
+            <option value="last_6_months">Últimos 6 meses</option>
+            <option value="last_12_months">Últimos 12 meses</option>
+            <option value="current_year">Año actual</option>
+            <option value="all">Todo el histórico</option>
+            <option value="custom">Período personalizado</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-500">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
 
         <!-- Custom Date Range Inputs -->
         <ng-container *ngIf="timeRange() === 'custom'">
           <div class="flex items-center gap-1.5 w-full sm:w-auto">
-            <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 py-1 text-xs">
+            <div class="h-9 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 text-xs">
               <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Desde</span>
               <input
                 type="date"
@@ -193,7 +222,7 @@
                 title="Fecha mínima"
               />
             </div>
-            <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 py-1 text-xs">
+            <div class="h-9 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl px-2.5 text-xs">
               <span class="text-[11px] font-medium text-slate-500 dark:text-slate-400">Hasta</span>
               <input
                 type="date"
@@ -207,27 +236,107 @@
           </div>
         </ng-container>
 
-        <!-- Category filter -->
-        <select
-          [ngModel]="selectedCategory()"
-          (ngModelChange)="selectedCategory.set($event)"
-          class="w-full sm:w-auto px-3 py-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
-        >
-          <option value="all">Todas las categorías</option>
-          <option *ngFor="let cat of availableCategories()" [value]="cat">{{ cat }}</option>
-        </select>
+        <!-- Category Multi-Select Filter -->
+        <div id="category-dropdown-container" class="relative w-full sm:w-auto">
+          <button
+            type="button"
+            (click)="showCategoryDropdown.set(!showCategoryDropdown())"
+            class="h-9 w-full sm:w-auto px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 flex items-center justify-between gap-2.5 cursor-pointer transition select-none"
+            [ngClass]="{ 'border-emerald-500/60 ring-1 ring-emerald-500/30': selectedCategories().length > 0 }"
+            title="Filtrar por una o varias categorías"
+          >
+            <div class="flex items-center space-x-1.5 truncate">
+              <span class="w-2 h-2 rounded-full flex-shrink-0" [ngClass]="selectedCategories().length > 0 ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+              <span *ngIf="selectedCategories().length === 0" class="truncate">Todas las categorías</span>
+              <span *ngIf="selectedCategories().length === 1" class="font-medium truncate text-emerald-600 dark:text-emerald-400">
+                {{ selectedCategories()[0] }}
+              </span>
+              <span *ngIf="selectedCategories().length > 1" class="font-medium text-emerald-600 dark:text-emerald-400">
+                {{ selectedCategories().length }} categorías
+              </span>
+            </div>
+            <svg
+              class="w-3.5 h-3.5 text-slate-500 transition-transform duration-200 flex-shrink-0"
+              [ngClass]="{ 'rotate-180': showCategoryDropdown() }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <!-- Dropdown Popover Menu -->
+          <div
+            *ngIf="showCategoryDropdown()"
+            class="absolute left-0 mt-1.5 w-64 max-h-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl p-2 z-50 flex flex-col space-y-1 backdrop-blur-lg animate-slide-up"
+          >
+            <!-- Header with actions -->
+            <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
+              <span>Selecciona una o más</span>
+              <button
+                *ngIf="selectedCategories().length > 0"
+                type="button"
+                (click)="clearSelectedCategories()"
+                class="text-rose-500 hover:text-rose-600 font-medium cursor-pointer"
+              >
+                Limpiar
+              </button>
+            </div>
+
+            <!-- List of categories with toggle click -->
+            <div class="overflow-y-auto space-y-0.5 max-h-60 pr-1 custom-scrollbar">
+              <button
+                *ngFor="let cat of availableCategories()"
+                type="button"
+                (click)="toggleCategory(cat)"
+                class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition cursor-pointer text-left select-none"
+                [ngClass]="
+                  isCategorySelected(cat)
+                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70'
+                "
+              >
+                <div class="flex items-center space-x-2 truncate">
+                  <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" [style.background-color]="getCategoryColor(cat)"></span>
+                  <span class="truncate">{{ cat }}</span>
+                </div>
+                <!-- Checkbox visual indicator -->
+                <div
+                  class="w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors"
+                  [ngClass]="
+                    isCategorySelected(cat)
+                      ? 'bg-emerald-500 border-emerald-500 text-white'
+                      : 'border-slate-300 dark:border-slate-600 bg-transparent'
+                  "
+                >
+                  <svg *ngIf="isCategorySelected(cat)" class="w-3 h-3 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <!-- Type filter -->
-        <select
-          [ngModel]="selectedType()"
-          (ngModelChange)="selectedType.set($event)"
-          class="w-full sm:w-auto px-3 py-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
-        >
-          <option value="all">Todos los tipos</option>
-          <option value="Ingreso">Ingreso</option>
-          <option value="Gasto recurrente">Gasto recurrente</option>
-          <option value="Gasto único">Gasto único</option>
-        </select>
+        <div class="relative w-full sm:w-auto">
+          <select
+            [ngModel]="selectedType()"
+            (ngModelChange)="selectedType.set($event)"
+            class="h-9 w-full sm:w-auto pl-3 pr-8 appearance-none bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
+          >
+            <option value="all">Todos los tipos</option>
+            <option value="Ingreso">Ingreso</option>
+            <option value="Gasto recurrente">Gasto recurrente</option>
+            <option value="Gasto único">Gasto único</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-500">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
 
         <!-- Search input -->
         <div class="relative w-full sm:w-auto 2xl:w-60">
@@ -236,9 +345,9 @@
             [ngModel]="searchQuery()"
             (ngModelChange)="searchQuery.set($event)"
             placeholder="Buscar movimiento..."
-            class="w-full pl-8 pr-3 py-1.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+            class="h-9 w-full pl-8 pr-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
           />
-          <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
@@ -247,7 +356,7 @@
         <button
           *ngIf="hasActiveFilters()"
           (click)="clearFilters()"
-          class="flex items-center space-x-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 rounded-xl text-xs font-medium transition cursor-pointer"
+          class="h-9 flex items-center space-x-1.5 px-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 rounded-xl text-xs font-medium transition cursor-pointer"
           title="Restablecer todos los filtros"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,7 +440,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-4 sm:gap-5">
         
         <!-- Card: Total Ingresos -->
-        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700 transition">
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden">
           <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span class="text-xs font-semibold uppercase tracking-wider">Ingresos Totales</span>
             <div class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
@@ -349,7 +458,7 @@
         </div>
 
         <!-- Card: Total Gastos -->
-        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700 transition">
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden">
           <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span class="text-xs font-semibold uppercase tracking-wider">Gastos Totales</span>
             <div class="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center">
@@ -368,7 +477,7 @@
         </div>
 
         <!-- Card: Balance Neto -->
-        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700 transition">
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden">
           <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span class="text-xs font-semibold uppercase tracking-wider">Balance Neto</span>
             <div
@@ -392,7 +501,7 @@
         </div>
 
         <!-- Card: Tasa de Ahorro -->
-        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden group hover:border-slate-300 dark:hover:border-slate-700 transition">
+        <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-xl backdrop-blur-md relative overflow-hidden">
           <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
             <span class="text-xs font-semibold uppercase tracking-wider">Tasa de Ahorro</span>
             <div class="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
@@ -414,7 +523,7 @@
       <!-- Charts Section (Expanded width support on Ultrawide screens) -->
       <app-charts
         [stats]="stats()"
-        [selectedCategory]="selectedCategory()"
+        [selectedCategory]="selectedCategories()"
         (categorySelect)="onCategorySelect($event)"
       ></app-charts>
 

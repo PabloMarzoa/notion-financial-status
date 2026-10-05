@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-10-05
+
+### Added
+- **Multi-Category Selection Filter**:
+  - The filter toolbar now features an interactive multi-select dropdown button indicating the active selection ("Todas las categorías", single category name, or count of selected categories) with toggle options and a clear action.
+  - Clicking any category selects or deselects it in the multi-select array.
+  - The category breakdown card in [ChartsComponent](file:///Users/pmarzoa/dev/finanzas/src/app/components/charts/charts.component.ts) now preserves all categories for the selected period rather than hiding non-matching items; non-selected categories are softly dimmed while filtered categories are highlighted with borders and badges.
+  - Clicking categories in the chart progress bar or category rows toggles their selection state seamlessly.
+  - Transactions table, financial summaries, and CSV exports reflect records matching any of the chosen categories.
+
+---
+
 ## [0.4.0] - 2026-10-05
 
 ### Added

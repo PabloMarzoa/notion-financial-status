@@ -164,14 +164,29 @@ describe('DashboardComponent', () => {
     expect(component.filteredRecords().length).toBe(1);
     expect(component.filteredRecords()[0].name).toBe('Gasto Mes Pasado');
 
-    // Filtro por categoría
+    // Filtro por categoría individual y múltiple
     component.timeRange.set('all');
-    component.selectedCategory.set('Comida');
+    component.selectedCategories.set(['Comida']);
     expect(component.filteredRecords().length).toBe(2);
     expect(component.filteredRecords()[0].categoria).toBe('Comida');
 
+    // Filtro con múltiples categorías simultáneas
+    component.toggleCategory('Gasolina');
+    expect(component.selectedCategories()).toEqual(['Comida', 'Gasolina']);
+    expect(component.filteredRecords().length).toBe(3);
+
+    // Deseleccionar categoría al hacer toggle de nuevo
+    component.toggleCategory('Comida');
+    expect(component.selectedCategories()).toEqual(['Gasolina']);
+    expect(component.filteredRecords().length).toBe(1);
+    expect(component.filteredRecords()[0].name).toBe('Gasolina Repsol');
+
+    // Limpiar categorías
+    component.clearSelectedCategories();
+    expect(component.selectedCategories()).toEqual([]);
+    expect(component.filteredRecords().length).toBe(4);
+
     // Filtro por búsqueda
-    component.selectedCategory.set('all');
     component.searchQuery.set('repsol');
     expect(component.filteredRecords().length).toBe(1);
     expect(component.filteredRecords()[0].name).toBe('Gasolina Repsol');
@@ -180,7 +195,7 @@ describe('DashboardComponent', () => {
     // Borrar filtros
     component.clearFilters();
     expect(component.timeRange()).toBe('current_month');
-    expect(component.selectedCategory()).toBe('all');
+    expect(component.selectedCategories()).toEqual([]);
     expect(component.selectedType()).toBe('all');
     expect(component.searchQuery()).toBe('');
     expect(component.customStartDate()).toBe('');
@@ -247,7 +262,7 @@ describe('DashboardComponent', () => {
 
   it('should sort filteredRecords from newest to oldest by date', () => {
     component.timeRange.set('all');
-    component.selectedCategory.set('all');
+    component.selectedCategories.set([]);
     component.selectedType.set('all');
     component.searchQuery.set('');
 
@@ -332,21 +347,28 @@ describe('DashboardComponent', () => {
     expect(component.allRecords()[0].name).toBe('Gasto Original');
   });
 
-  it('should toggle selectedCategory on onCategorySelect', () => {
-    component.selectedCategory.set('all');
+  it('should toggle selectedCategories on onCategorySelect and toggleCategory', () => {
+    component.selectedCategories.set([]);
     component.onCategorySelect('Comida');
-    expect(component.selectedCategory()).toBe('Comida');
+    expect(component.selectedCategories()).toEqual(['Comida']);
+    expect(component.isCategorySelected('Comida')).toBe(true);
 
-    // Clicking again should toggle back to 'all'
-    component.onCategorySelect('Comida');
-    expect(component.selectedCategory()).toBe('all');
-
-    // Selecting another category sets it
+    // Selecting another category adds it to the list
     component.onCategorySelect('Gasolina');
-    expect(component.selectedCategory()).toBe('Gasolina');
+    expect(component.selectedCategories()).toEqual(['Comida', 'Gasolina']);
+    expect(component.isCategorySelected('Gasolina')).toBe(true);
+
+    // Clicking again should toggle off and remove it
+    component.onCategorySelect('Comida');
+    expect(component.selectedCategories()).toEqual(['Gasolina']);
+    expect(component.isCategorySelected('Comida')).toBe(false);
+
+    // Clicking the remaining category should remove it resulting in empty list
+    component.onCategorySelect('Gasolina');
+    expect(component.selectedCategories()).toEqual([]);
   });
 
-  it('should restore filters from localStorage on initialization if present', () => {
+  it('should restore filters from localStorage on initialization if present (including legacy string selectedCategory)', () => {
     const savedState = {
       timeRange: 'last_3_months',
       selectedCategory: 'Comida',
@@ -359,7 +381,7 @@ describe('DashboardComponent', () => {
     const restoredComp = restoredFixture.componentInstance;
 
     expect(restoredComp.timeRange()).toBe('last_3_months');
-    expect(restoredComp.selectedCategory()).toBe('Comida');
+    expect(restoredComp.selectedCategories()).toEqual(['Comida']);
     expect(restoredComp.selectedType()).toBe('Gasto único');
     expect(restoredComp.searchQuery()).toBe('Mercadona');
   });
@@ -395,7 +417,7 @@ describe('DashboardComponent', () => {
 
     component.allRecords.set([rec1, rec2, rec3]);
     component.timeRange.set('custom');
-    component.selectedCategory.set('all');
+    component.selectedCategories.set([]);
     component.selectedType.set('all');
     component.searchQuery.set('');
 
@@ -439,7 +461,7 @@ describe('DashboardComponent', () => {
     component.setTimeRange('custom');
     component.setCustomStartDate('2026-01-01');
     component.setCustomEndDate('2026-02-01');
-    component.selectedCategory.set('Gasolina');
+    component.selectedCategories.set(['Gasolina']);
     component.selectedType.set('Ingreso');
     component.searchQuery.set('Repsol');
 
@@ -449,7 +471,7 @@ describe('DashboardComponent', () => {
     expect(stored.timeRange).toBe('custom');
     expect(stored.customStartDate).toBe('2026-01-01');
     expect(stored.customEndDate).toBe('2026-02-01');
-    expect(stored.selectedCategory).toBe('Gasolina');
+    expect(stored.selectedCategories).toEqual(['Gasolina']);
     expect(stored.selectedType).toBe('Ingreso');
     expect(stored.searchQuery).toBe('Repsol');
   });

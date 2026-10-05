@@ -71,4 +71,20 @@ describe('ChartsComponent', () => {
     component.onCategoryClick('Comida');
     expect(emitted).toBe('Comida');
   });
+
+  it('should support array of selected categories in isCategorySelected and hasActiveCategoryFilters', () => {
+    component.selectedCategory = ['Comida', 'Gasolina'];
+    expect(component.hasActiveCategoryFilters()).toBe(true);
+    expect(component.isCategorySelected('comida')).toBe(true);
+    expect(component.isCategorySelected('Gasolina')).toBe(true);
+    expect(component.isCategorySelected('Ocio')).toBe(false);
+
+    component.selectedCategory = [];
+    expect(component.hasActiveCategoryFilters()).toBe(false);
+    expect(component.isCategorySelected('Comida')).toBe(false);
+
+    component.selectedCategory = 'all';
+    expect(component.hasActiveCategoryFilters()).toBe(false);
+    expect(component.isCategorySelected('Comida')).toBe(false);
+  });
 });

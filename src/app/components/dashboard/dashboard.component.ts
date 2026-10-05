@@ -23,7 +23,8 @@ const STORAGE_KEY_FILTERS = 'finanzas_filters_state';
 
 interface StoredFilters {
   timeRange?: TimeRangeFilter;
-  selectedCategory?: string;
+  selectedCategory?: string; // backwards compatibility
+  selectedCategories?: string[];
   selectedType?: string;
   searchQuery?: string;
   customStartDate?: string;
@@ -58,11 +59,12 @@ export class DashboardComponent implements OnInit {
   timeRange = signal<TimeRangeFilter>(this.storedFilters.timeRange || 'current_month');
   customStartDate = signal<string>(this.storedFilters.customStartDate || '');
   customEndDate = signal<string>(this.storedFilters.customEndDate || '');
-  selectedCategory = signal<string>(this.storedFilters.selectedCategory || 'all');
+  selectedCategories = signal<string[]>(this.storedFilters.selectedCategories || []);
   selectedType = signal<string>(this.storedFilters.selectedType || 'all');
   searchQuery = signal<string>(this.storedFilters.searchQuery || '');
   showConfigModal = signal<boolean>(false);
   showCreateModal = signal<boolean>(false);
+  showCategoryDropdown = signal<boolean>(false);
   selectedRecordForEdit = signal<FinancialRecord | null>(null);
   usingMockData = signal<boolean>(!this.notionService.hasConfiguredCredentials());
 
@@ -70,7 +72,7 @@ export class DashboardComponent implements OnInit {
     effect(() => {
       const state: StoredFilters = {
         timeRange: this.timeRange(),
-        selectedCategory: this.selectedCategory(),
+        selectedCategories: this.selectedCategories(),
         selectedType: this.selectedType(),
         searchQuery: this.searchQuery(),
         customStartDate: this.customStartDate(),
@@ -96,9 +98,17 @@ export class DashboardComponent implements OnInit {
             'all',
             'custom',
           ];
+
+          let categories: string[] = [];
+          if (Array.isArray(parsed.selectedCategories)) {
+            categories = parsed.selectedCategories.filter((c: unknown) => typeof c === 'string');
+          } else if (typeof parsed.selectedCategory === 'string' && parsed.selectedCategory !== 'all') {
+            categories = [parsed.selectedCategory];
+          }
+
           return {
             timeRange: validRanges.includes(parsed.timeRange) ? parsed.timeRange : 'current_month',
-            selectedCategory: typeof parsed.selectedCategory === 'string' ? parsed.selectedCategory : 'all',
+            selectedCategories: categories,
             selectedType: typeof parsed.selectedType === 'string' ? parsed.selectedType : 'all',
             searchQuery: typeof parsed.searchQuery === 'string' ? parsed.searchQuery : '',
             customStartDate: typeof parsed.customStartDate === 'string' ? parsed.customStartDate : '',
@@ -122,11 +132,10 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  // Filtro reactivo de registros
-  filteredRecords = computed(() => {
+  // Registros filtrados por rango temporal, tipo y texto (base para stats y categorías)
+  timeAndTypeFilteredRecords = computed(() => {
     const records = this.allRecords();
     const range = this.timeRange();
-    const cat = this.selectedCategory();
     const type = this.selectedType();
     const query = this.searchQuery().toLowerCase().trim();
     const customStart = this.customStartDate();
@@ -174,11 +183,6 @@ export class DashboardComponent implements OnInit {
         }
       }
 
-      // Filtro Categoría
-      if (cat !== 'all' && rec.categoria.toLowerCase() !== cat.toLowerCase()) {
-        return false;
-      }
-
       // Filtro Tipo
       if (type !== 'all' && rec.tipo !== type) {
         return false;
@@ -193,12 +197,29 @@ export class DashboardComponent implements OnInit {
       }
 
       return true;
-    }).sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+    });
+  });
+
+  // Filtro reactivo de registros aplicando también las categorías seleccionadas
+  filteredRecords = computed(() => {
+    const list = this.timeAndTypeFilteredRecords();
+    const categories = this.selectedCategories().map((c) => c.toLowerCase());
+
+    if (categories.length === 0) {
+      return [...list].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+    }
+
+    return list
+      .filter((rec) => categories.includes(rec.categoria.toLowerCase()))
+      .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
   });
 
   // Estadísticas y Métricas
   stats = computed<FinancialStats>(() => {
+    // Calculamos el desglose de categorías sobre el período (sin filtrar por categoría para mantener visibles todas las categorías)
+    const baseList = this.timeAndTypeFilteredRecords();
     const list = this.filteredRecords();
+
     let totalIngresos = 0;
     let totalGastos = 0;
     let totalGastoRecurrente = 0;
@@ -207,6 +228,19 @@ export class DashboardComponent implements OnInit {
     const catMap = new Map<string, { total: number; count: number }>();
     const monthMap = new Map<string, { label: string; ingresos: number; gastos: number }>();
 
+    // Acumular categorías usando baseList para que todas permanezcan visibles en la tarjeta de categorías
+    let totalBaseGastos = 0;
+    for (const rec of baseList) {
+      if (rec.tipo !== 'Ingreso') {
+        totalBaseGastos += rec.cantidad;
+        const currentCat = catMap.get(rec.categoria) || { total: 0, count: 0 };
+        currentCat.total += rec.cantidad;
+        currentCat.count += 1;
+        catMap.set(rec.categoria, currentCat);
+      }
+    }
+
+    // Acumular métricas y mensual usando los registros finales filtrados
     for (const rec of list) {
       if (rec.tipo === 'Ingreso') {
         totalIngresos += rec.cantidad;
@@ -217,12 +251,6 @@ export class DashboardComponent implements OnInit {
         } else {
           totalGastoUnico += rec.cantidad;
         }
-
-        // Acumular por categoría solo gastos
-        const currentCat = catMap.get(rec.categoria) || { total: 0, count: 0 };
-        currentCat.total += rec.cantidad;
-        currentCat.count += 1;
-        catMap.set(rec.categoria, currentCat);
       }
 
       // Acumular mensual para el intervalo seleccionado
@@ -245,7 +273,7 @@ export class DashboardComponent implements OnInit {
     // Breakdown de categorías ordenado
     const categoryBreakdown: CategorySummary[] = Array.from(catMap.entries())
       .map(([category, data]) => {
-        const percentage = totalGastos > 0 ? (data.total / totalGastos) * 100 : 0;
+        const percentage = totalBaseGastos > 0 ? (data.total / totalBaseGastos) * 100 : 0;
         const color = CATEGORY_COLORS[category] || '#94a3b8';
         return {
           category,
@@ -256,6 +284,7 @@ export class DashboardComponent implements OnInit {
         };
       })
       .sort((a, b) => b.total - a.total);
+
 
     // Breakdown mensual ordenado cronológicamente según los meses del intervalo seleccionado
     const monthlyBreakdown = Array.from(monthMap.entries())
@@ -328,11 +357,28 @@ export class DashboardComponent implements OnInit {
   }
 
   onCategorySelect(category: string) {
-    if (this.selectedCategory().toLowerCase() === category.toLowerCase()) {
-      this.selectedCategory.set('all');
-    } else {
-      this.selectedCategory.set(category);
-    }
+    this.toggleCategory(category);
+  }
+
+  toggleCategory(category: string) {
+    this.selectedCategories.update((cats) => {
+      const lowerCat = category.toLowerCase();
+      const exists = cats.some((c) => c.toLowerCase() === lowerCat);
+      if (exists) {
+        return cats.filter((c) => c.toLowerCase() !== lowerCat);
+      } else {
+        return [...cats, category];
+      }
+    });
+  }
+
+  isCategorySelected(category: string): boolean {
+    const lowerCat = category.toLowerCase();
+    return this.selectedCategories().some((c) => c.toLowerCase() === lowerCat);
+  }
+
+  clearSelectedCategories() {
+    this.selectedCategories.set([]);
   }
 
   selectRecordForEdit(record: FinancialRecord) {
@@ -454,7 +500,7 @@ export class DashboardComponent implements OnInit {
   hasActiveFilters = computed(() => {
     return (
       this.timeRange() !== 'current_month' ||
-      this.selectedCategory() !== 'all' ||
+      this.selectedCategories().length > 0 ||
       this.selectedType() !== 'all' ||
       this.searchQuery().trim() !== '' ||
       this.customStartDate() !== '' ||
@@ -464,7 +510,7 @@ export class DashboardComponent implements OnInit {
 
   clearFilters() {
     this.timeRange.set('current_month');
-    this.selectedCategory.set('all');
+    this.selectedCategories.set([]);
     this.selectedType.set('all');
     this.searchQuery.set('');
     this.customStartDate.set('');

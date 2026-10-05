@@ -229,15 +229,88 @@
           </div>
         </ng-container>
 
-        <!-- Category filter -->
-        <select
-          [ngModel]="selectedCategory()"
-          (ngModelChange)="selectedCategory.set($event)"
-          class="h-9 w-full sm:w-auto px-3 bg-slate-100 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
-        >
-          <option value="all">Todas las categorías</option>
-          <option *ngFor="let cat of availableCategories()" [value]="cat">{{ cat }}</option>
-        </select>
+        <!-- Category Multi-Select Filter -->
+        <div class="relative w-full sm:w-auto">
+          <button
+            type="button"
+            (click)="showCategoryDropdown.set(!showCategoryDropdown())"
+            class="h-9 w-full sm:w-auto px-3 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200/70 dark:hover:bg-slate-700/70 border border-slate-300 dark:border-slate-700/80 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 flex items-center justify-between gap-2 cursor-pointer transition select-none"
+            [ngClass]="{ 'border-emerald-500/60 ring-1 ring-emerald-500/30': selectedCategories().length > 0 }"
+            title="Filtrar por una o varias categorías"
+          >
+            <div class="flex items-center space-x-1.5 truncate">
+              <span class="w-2 h-2 rounded-full" [ngClass]="selectedCategories().length > 0 ? 'bg-emerald-500' : 'bg-slate-400'"></span>
+              <span *ngIf="selectedCategories().length === 0" class="truncate">Todas las categorías</span>
+              <span *ngIf="selectedCategories().length === 1" class="font-medium truncate text-emerald-600 dark:text-emerald-400">
+                {{ selectedCategories()[0] }}
+              </span>
+              <span *ngIf="selectedCategories().length > 1" class="font-medium text-emerald-600 dark:text-emerald-400">
+                {{ selectedCategories().length }} categorías
+              </span>
+            </div>
+            <svg
+              class="w-3.5 h-3.5 text-slate-500 transition-transform duration-200 flex-shrink-0"
+              [ngClass]="{ 'rotate-180': showCategoryDropdown() }"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <!-- Dropdown Popover Menu -->
+          <div
+            *ngIf="showCategoryDropdown()"
+            class="absolute left-0 mt-1.5 w-64 max-h-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl p-2 z-50 flex flex-col space-y-1 backdrop-blur-lg"
+          >
+            <!-- Header with actions -->
+            <div class="flex items-center justify-between px-2 py-1 border-b border-slate-100 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400">
+              <span>Selecciona una o más</span>
+              <button
+                *ngIf="selectedCategories().length > 0"
+                type="button"
+                (click)="clearSelectedCategories()"
+                class="text-rose-500 hover:text-rose-600 font-medium cursor-pointer"
+              >
+                Limpiar
+              </button>
+            </div>
+
+            <!-- List of categories with toggle click -->
+            <div class="overflow-y-auto space-y-0.5 max-h-60 pr-1 custom-scrollbar">
+              <button
+                *ngFor="let cat of availableCategories()"
+                type="button"
+                (click)="toggleCategory(cat)"
+                class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition cursor-pointer text-left select-none"
+                [ngClass]="
+                  isCategorySelected(cat)
+                    ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-semibold'
+                    : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70'
+                "
+              >
+                <div class="flex items-center space-x-2 truncate">
+                  <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" [style.background-color]="getCategoryColor(cat)"></span>
+                  <span class="truncate">{{ cat }}</span>
+                </div>
+                <!-- Checkbox visual indicator -->
+                <div
+                  class="w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-colors"
+                  [ngClass]="
+                    isCategorySelected(cat)
+                      ? 'bg-emerald-500 border-emerald-500 text-white'
+                      : 'border-slate-300 dark:border-slate-600 bg-transparent'
+                  "
+                >
+                  <svg *ngIf="isCategorySelected(cat)" class="w-3 h-3 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <!-- Type filter -->
         <select
@@ -436,7 +509,7 @@
       <!-- Charts Section (Expanded width support on Ultrawide screens) -->
       <app-charts
         [stats]="stats()"
-        [selectedCategory]="selectedCategory()"
+        [selectedCategory]="selectedCategories()"
         (categorySelect)="onCategorySelect($event)"
       ></app-charts>
 
